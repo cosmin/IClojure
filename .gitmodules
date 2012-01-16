@@ -1,0 +1,3 @@
+[submodule "jline2"]
+	path = jline2
+	url = git://github.com/jline/jline2.git
