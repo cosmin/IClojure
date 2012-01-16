@@ -1,7 +1,16 @@
 import clojure.lang.*;
+import clojure.lang.Compiler;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class Main {
@@ -9,6 +18,105 @@ public class Main {
     private int inputNumber;
     private String namespace;
     private Var ns;
+    private Var eval;
+
+    public String join(String separator, Object... members) {
+        return RT.var("clojure.string", "join").invoke(separator, members).toString();
+    }
+
+    public String formatParameterTypes(Class... parameterTypes) {
+        List<String> classNames = new ArrayList<String>();
+
+        for (Class c : parameterTypes) {
+            classNames.add(c.getSimpleName());
+        }
+
+        return join(", ", classNames.toArray());
+    }
+
+    public <T> List<T> filterByStatic(List<T> all, boolean wantStatic) {
+        List<T> ret = new ArrayList<T>();
+
+        for (T el : all) {
+            if (el instanceof Method) {
+                if (wantStatic == Modifier.isStatic(((Method) el).getModifiers())) {
+                    ret.add(el);
+                }
+            } else if (el instanceof Field) {
+                if (wantStatic == Modifier.isStatic(((Field) el).getModifiers())) {
+                    ret.add(el);
+                }
+            }
+        }
+
+        return ret;
+    }
+
+
+    public void describe(Object object) throws IOException {
+        Class inspect;
+        if (object instanceof Class) {
+            inspect = (Class) object;
+        } else {
+            inspect = object.getClass();
+        }
+
+        List<Field> fields = Arrays.asList(inspect.getFields());
+        List<Method> methods = Arrays.asList(inspect.getMethods());
+        List<Constructor> constructors = Arrays.asList(inspect.getConstructors());
+
+        reader.println("Class: " + inspect.getCanonicalName());
+
+        reader.println();
+
+
+        for (Constructor c : constructors) {
+            reader.println("<init> " + c.getName() + "(" + formatParameterTypes(c.getParameterTypes()) + ")");
+        }
+
+        reader.println();
+
+        for (Method m : filterByStatic(methods, true)) {
+            printMethod(m);
+        }
+        for (Method m : filterByStatic(methods, false)) {
+            printMethod(m);
+        }
+
+        reader.println();
+
+        for (Field f : filterByStatic(fields, true)) {
+            printField(f);
+        }
+        for (Field f : filterByStatic(fields, false)) {
+            printField(f);
+        }
+    }
+
+    private void printField(Field f) throws IOException {
+        StringBuffer output = new StringBuffer();
+        if (Modifier.isStatic(f.getModifiers())) {
+            output.append("static ");
+        }
+        output.append(f.getType().getSimpleName());
+        output.append(" ");
+        output.append(f.getName());
+        reader.println(output.toString());
+    }
+
+    private void printMethod(Method m) throws IOException {
+        StringBuffer output = new StringBuffer();
+        if (Modifier.isStatic(m.getModifiers())) {
+            output.append("static ");
+        }
+        output.append(m.getReturnType().getSimpleName());
+        output.append(" ");
+        output.append(m.getName());
+        output.append("(");
+        output.append(formatParameterTypes(m.getParameterTypes()));
+        output.append(")");
+        reader.println(output.toString());
+    }
 
     public Main(ConsoleReader reader) {
         this.reader = reader;
@@ -16,6 +124,8 @@ public class Main {
         this.namespace = "user";
 
         this.ns = RT.var("clojure.core", "*ns*");
+        this.eval = RT.var("clojure.core", "eval");
+
         Var.pushThreadBindings(RT.map(ns, ns.deref()));
         RT.var("clojure.core", "in-ns").invoke(Symbol.create(null, "user"));
 
@@ -68,7 +178,7 @@ public class Main {
         if (line == null) {
             return null;
         }
-        Var eval = RT.var("clojure.core", "eval");
+
         try {
             Object ret = eval.invoke(line);
             return RT.printString(ret);
@@ -83,10 +193,16 @@ public class Main {
 
         if (line.equals("exit")) {
             throw new StopInputException();
+        } else if (line.startsWith("%")) {
+            if (line.startsWith("%d")) {
+                Object input = RT.readString(line.replace("%d", "").trim());
+                describe(eval.invoke(input));
+            } else {
+                reader.println("Unknown command!");
+            }
         } else if (line.startsWith("?")) {
             if (line.equals("?")) {
                 help();
-                return null;
             } else if (line.startsWith("??")) {
                 return RT.readString("(source " + line.replace("??", "") + ")");
             } else {
@@ -95,6 +211,8 @@ public class Main {
         } else {
             return RT.readString(line);
         }
+
+        return null;
     }
 
 
@@ -118,9 +236,10 @@ public class Main {
             reader.println("Clojure 1.3.0");
             reader.println();
             reader.println("IClojure 1.0 -- an enhanced Interactive Clojure");
-            reader.println("?        -> Introduction and overview of IClojure's features");
-            reader.println("?symbol  -> Print documentation for symbol");
-            reader.println("??symbol -> Show source of function or macro");
+            reader.println("?         -> Introduction and overview of IClojure's features");
+            reader.println("?symbol   -> Print documentation for symbol");
+            reader.println("??symbol  -> Show source of function or macro");
+            reader.println("%d symbol -> Describe Java class (show constructors, methods and fields)");
             reader.println();
 
             Main main = new Main(reader);
