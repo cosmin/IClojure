@@ -163,7 +163,7 @@ public class Main {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         } catch (StopInputException e) {
-            //
+            return;
         }
     }
 
@@ -192,6 +192,7 @@ public class Main {
         String line = reader.readLine(String.format("%s[%d]: ", namespace, inputNumber));
 
         if (line.equals("exit")) {
+            RT.var("clojure.core", "shutdown-agents").invoke();
             throw new StopInputException();
         } else if (line.startsWith("%")) {
             if (line.startsWith("%d")) {
@@ -208,6 +209,8 @@ public class Main {
             } else {
                 return RT.readString("(doc " + line.replace("?", "") + ")");
             }
+        } else if (line.trim().equals("") ) {
+            return null;
         } else {
             return RT.readString(line);
         }
