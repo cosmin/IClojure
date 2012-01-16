@@ -2,6 +2,8 @@ import clojure.lang.*;
 import clojure.lang.Compiler;
 import jline.console.ConsoleReader;
 import jline.console.completer.Completer;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -21,6 +23,8 @@ public class Main {
     private Var ns;
     private Var eval;
     final private Var completions;
+
+    private StringBuffer inputSoFar = new StringBuffer();
 
     public Main(ConsoleReader reader) throws ClassNotFoundException, IOException {
         this.reader = reader;
@@ -84,6 +88,19 @@ public class Main {
                 return matchStart;
             }
         });
+    }
+
+    public void abortCurrentRead() throws IOException {
+        this.reader.setCursorPosition(0);
+        this.reader.killLine();
+
+        if (this.inputSoFar.length() > 0) {
+            this.inputSoFar = new StringBuffer();
+            this.reader.println();
+            this.reader.setPrompt(String.format("%s[%d]: ", namespace, inputNumber));
+            this.reader.redrawLine();
+            this.reader.flush();
+        }
     }
 
 
@@ -207,8 +224,10 @@ public class Main {
             while (true) {
                 inputNumber += 1;
                 input = read();
-                output = eval(input);
-                print(output);
+                if (input != null) {
+                    output = eval(input);
+                    print(output);
+                }
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
@@ -239,7 +258,13 @@ public class Main {
     }
 
     private Object read() throws IOException, StopInputException {
-        String line = reader.readLine(String.format("%s[%d]: ", namespace, inputNumber));
+        String line;
+
+        if (inputSoFar.length() > 0) {
+            line = reader.readLine("... ");
+        } else {
+            line = reader.readLine(String.format("%s[%d]: ", namespace, inputNumber));
+        }
 
         if (line.equals("exit")) {
             RT.var("clojure.core", "shutdown-agents").invoke();
@@ -262,7 +287,16 @@ public class Main {
         } else if (line.trim().equals("") ) {
             return null;
         } else {
-            return RT.readString(line);
+            try {
+                Object read = RT.readString(inputSoFar.toString() + line);
+                inputSoFar = new StringBuffer();
+                return read;
+            } catch (RuntimeException re) {
+                if (re.getMessage().startsWith("EOF while reading")) {
+                    inputSoFar.append(line + " ");
+                    return null;
+                }
+            }
         }
 
         return null;
@@ -273,6 +307,7 @@ public class Main {
 
         try {
             final ConsoleReader reader = new ConsoleReader();
+
 
             // handle abnormal termination
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -295,7 +330,24 @@ public class Main {
             reader.println("%d symbol -> Describe Java class (show constructors, methods and fields)");
             reader.println();
 
-            Main main = new Main(reader);
+            final Main main = new Main(reader);
+            class ControlCSignalHandler implements SignalHandler {
+
+                public void install() {
+                    Signal signal = new Signal("INT");
+                    Signal.handle(signal, new ControlCSignalHandler());
+                }
+
+                public void handle(Signal signal) {
+                    try {
+                        main.abortCurrentRead();
+                    } catch (IOException e) {
+                        //
+                    }
+                }
+            }
+
+            new ControlCSignalHandler().install();
             main.loop();
 
         } catch (IOException e) {
