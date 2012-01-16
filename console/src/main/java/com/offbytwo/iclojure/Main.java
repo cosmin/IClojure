@@ -67,6 +67,9 @@ public class Main {
                     }
 
                     symbolToComplete = buffer.substring(matchStart);
+                } else if (buffer.startsWith("%d")) {
+                    matchStart = 3;
+                    symbolToComplete = buffer.substring(matchStart);
                 } else if (buffer.startsWith("(. ")) {
                     String prefix;
                     if (buffer.lastIndexOf(' ') == cursor - 1) {
