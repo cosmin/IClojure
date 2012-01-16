@@ -1,0 +1,33 @@
+IClojure is an Interactive Clojure repl, inspired by IPython.
+
+License: Eclipse Public License (EPL), same as Clojure.
+
+
+Features:
+
+* Tab completion, based on http://github.com/ninjudd/clojure-complete, itself based on swank-clojure.
+* Shorthand for source and doc
+* Shorthand for introspecting Java objects and classes via reflection
+* Proper Control-C handling, although not very portable
+
+
+Tab completion:
+
+* variable
+* method invocations
+* "(.method" completion for all java methods for any of the classes in the current namespace
+* "(. object method" completion for all the methods of the object (or a form that evaluates to an object)
+
+
+Other shorthands:
+
+  ?symbol    => (doc symbol)
+  ??symbol   => (source symbol)
+  %d symbol  => show constructors, methods and fields of the given object or Class
+
+Roadmap:
+
+* input caching, similar to IPython
+* output caching, similar to IPython
+* persist history across sessions to ~/.iclojure_history
+* more advanced auto-completions
