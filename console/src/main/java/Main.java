@@ -44,11 +44,22 @@ public class Main {
 
         reader.addCompleter(new Completer() {
             public int complete(String buffer, int cursor, List<CharSequence> candidates) {
-                LazySeq results = (LazySeq) completions.invoke(buffer);
+                String symbolToComplete;
+                int matchStart;
+
+                if (buffer.startsWith("(")) {
+                    symbolToComplete = buffer.replaceFirst("\\(", "");
+                    matchStart = 1;
+                } else {
+                    symbolToComplete = buffer;
+                    matchStart = 0;
+                }
+
+                LazySeq results = (LazySeq) completions.invoke(symbolToComplete);
                 for (Object result : Arrays.asList(results.toArray())) {
                     candidates.add((String) result);
                 }
-                return 0;
+                return matchStart;
             }
         });
     }
