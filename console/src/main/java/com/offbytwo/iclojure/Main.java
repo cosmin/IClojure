@@ -60,7 +60,14 @@ public class Main {
                     buffer = buffer.substring(0, cursor);
                 }
 
-                if (buffer.startsWith("(. ")) {
+                if (buffer.startsWith("?")) {
+                    matchStart = 1;
+                    if (buffer.startsWith("??")) {
+                        matchStart = 2;
+                    }
+
+                    symbolToComplete = buffer.substring(matchStart);
+                } else if (buffer.startsWith("(. ")) {
                     String prefix;
                     if (buffer.lastIndexOf(' ') == cursor - 1) {
                         prefix = "";
