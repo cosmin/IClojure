@@ -1,6 +1,7 @@
 import clojure.lang.*;
 import clojure.lang.Compiler;
 import jline.console.ConsoleReader;
+import jline.console.completer.Completer;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -19,6 +20,39 @@ public class Main {
     private String namespace;
     private Var ns;
     private Var eval;
+    final private Var completions;
+
+    public Main(ConsoleReader reader) throws ClassNotFoundException, IOException {
+        this.reader = reader;
+        this.inputNumber = 0;
+        this.namespace = "user";
+
+        this.ns = RT.var("clojure.core", "*ns*");
+        this.eval = RT.var("clojure.core", "eval");
+
+        Var.pushThreadBindings(RT.map(ns, ns.deref()));
+        RT.var("clojure.core", "in-ns").invoke(Symbol.create(null, "user"));
+
+        Var use = RT.var("clojure.core", "use");
+
+        use.invoke(RT.readString("[clojure.repl :only (source apropos dir pst doc find-doc)]"));
+        use.invoke(RT.readString("[clojure.java.javadoc :only (javadoc)]"));
+        use.invoke(RT.readString("[clojure.pprint :only (pprint)]"));
+
+        RT.load("complete");
+        this.completions = RT.var("complete", "completions");
+
+        reader.addCompleter(new Completer() {
+            public int complete(String buffer, int cursor, List<CharSequence> candidates) {
+                LazySeq results = (LazySeq) completions.invoke(buffer);
+                for (Object result : Arrays.asList(results.toArray())) {
+                    candidates.add((String) result);
+                }
+                return 0;
+            }
+        });
+    }
+
 
     public String join(String separator, Object... members) {
         return RT.var("clojure.string", "join").invoke(separator, members).toString();
@@ -118,23 +152,6 @@ public class Main {
         reader.println(output.toString());
     }
 
-    public Main(ConsoleReader reader) {
-        this.reader = reader;
-        this.inputNumber = 0;
-        this.namespace = "user";
-
-        this.ns = RT.var("clojure.core", "*ns*");
-        this.eval = RT.var("clojure.core", "eval");
-
-        Var.pushThreadBindings(RT.map(ns, ns.deref()));
-        RT.var("clojure.core", "in-ns").invoke(Symbol.create(null, "user"));
-
-        Var use = RT.var("clojure.core", "use");
-
-        use.invoke(RT.readString("[clojure.repl :only (source apropos dir pst doc find-doc)]"));
-        use.invoke(RT.readString("[clojure.java.javadoc :only (javadoc)]"));
-        use.invoke(RT.readString("[clojure.pprint :only (pprint)]"));
-    }
 
     public void help() throws IOException {
         reader.println("doc         => show documentation of the given function or macro");
@@ -251,6 +268,8 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Unable to create console reader");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
 
