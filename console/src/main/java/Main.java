@@ -37,8 +37,6 @@ public class Main {
         reader.println("pst         => print stack trace of the given exception");
         reader.println("pp          => pretty print the last value");
         reader.println("pprint      => pretty print the given value");
-
-
     }
 
     public void loop() {
@@ -67,6 +65,9 @@ public class Main {
     }
 
     private String eval(Object line) throws StopInputException {
+        if (line == null) {
+            return null;
+        }
         Var eval = RT.var("clojure.core", "eval");
         try {
             Object ret = eval.invoke(line);
@@ -79,10 +80,21 @@ public class Main {
 
     private Object read() throws IOException, StopInputException {
         String line = reader.readLine(String.format("%s[%d]: ", namespace, inputNumber));
+
         if (line.equals("exit")) {
             throw new StopInputException();
+        } else if (line.startsWith("?")) {
+            if (line.equals("?")) {
+                help();
+                return null;
+            } else if (line.startsWith("??")) {
+                return RT.readString("(source " + line.replace("??", "") + ")");
+            } else {
+                return RT.readString("(doc " + line.replace("?", "") + ")");
+            }
+        } else {
+            return RT.readString(line);
         }
-        return RT.readString(line);
     }
 
 
@@ -106,6 +118,9 @@ public class Main {
             reader.println("Clojure 1.3.0");
             reader.println();
             reader.println("IClojure 1.0 -- an enhanced Interactive Clojure");
+            reader.println("?        -> Introduction and overview of IClojure's features");
+            reader.println("?symbol  -> Print documentation for symbol");
+            reader.println("??symbol -> Show source of function or macro");
             reader.println();
 
             Main main = new Main(reader);
