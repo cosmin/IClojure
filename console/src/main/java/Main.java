@@ -47,7 +47,29 @@ public class Main {
                 String symbolToComplete;
                 int matchStart;
 
-                if (buffer.startsWith("(")) {
+                if (cursor <= buffer.length()) {
+                    buffer = buffer.substring(0, cursor);
+                }
+
+                if (buffer.startsWith("(. ")) {
+                    String prefix;
+                    if (buffer.lastIndexOf(' ') == cursor - 1) {
+                        prefix = "";
+                        matchStart = cursor;
+                    } else {
+                        prefix = buffer.substring(buffer.lastIndexOf(' ') + 1);
+                        matchStart = buffer.lastIndexOf(' ') + 1;
+                    }
+
+                    String form = buffer.replaceFirst("\\(\\. ", "").trim();
+                    Object output = eval.invoke(RT.readString(form));
+                    for (Method m : output.getClass().getMethods()) {
+                        if (m.getName().startsWith(prefix)) {
+                            candidates.add(m.getName());
+                        }
+                    }
+                    return matchStart;
+                } else if (buffer.startsWith("(")) {
                     symbolToComplete = buffer.replaceFirst("\\(", "");
                     matchStart = 1;
                 } else {

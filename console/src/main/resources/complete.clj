@@ -85,9 +85,10 @@
 
 (defmulti potential-completions
   (fn [prefix ns]
-    (cond (.contains prefix "/") :scoped
-          (.contains prefix ".") :class
-          :else                  :var)))
+    (cond (.contains prefix "/")      :scoped
+          (.startsWith prefix ".")    :classMethod
+          (< 0 (.indexOf prefix ".")) :class
+          :else                       :var)))
 
 (defmethod potential-completions :scoped
   [prefix ns]
@@ -97,6 +98,11 @@
            (static-members class)
            (when-let [ns (or (find-ns scope) (scope (ns-aliases ns)))]
              (ns-public-vars ns))))))
+
+(defmethod potential-completions :classMethod
+  [prefix ns]
+  (ns-java-methods ns))
+
 
 (defmethod potential-completions :class
   [prefix ns]
@@ -110,8 +116,7 @@
   (concat special-forms
           (namespaces ns)
           (ns-vars ns)
-          (ns-classes ns)
-          (ns-java-methods ns)))
+          (ns-classes ns)))
 
 (defn completions
   "Return a sequence of matching completions given a prefix string and an optional current namespace."
