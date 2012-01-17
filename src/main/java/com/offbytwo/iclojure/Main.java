@@ -14,6 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 
 public class Main {
@@ -30,6 +32,7 @@ public class Main {
     private Var output3;
     private Var lastError;
     private Var set;
+    private OutputStreamWriter writer;
 
     public Main(final ConsoleReader reader) throws ClassNotFoundException, IOException {
         this.reader = reader;
@@ -46,6 +49,16 @@ public class Main {
         describeHandler = new DescribeJavaObjectHandler(reader);
 
         this.ns = RT.var("clojure.core", "*ns*");
+
+        Var out = RT.var("clojure.core", "*out*");
+
+        writer = new OutputStreamWriter(new OutputStream() {
+            @Override
+            public void write(int i) throws IOException {
+                reader.print(String.valueOf((char) i));
+            }
+        });
+        Var.pushThreadBindings(RT.map(out, writer));
 
 
         Var.pushThreadBindings(RT.map(ns, ns.deref()));
@@ -124,13 +137,17 @@ public class Main {
         return null;
     }
 
-    private String eval(Object line) throws StopInputException {
+    private String eval(Object line) throws StopInputException, IOException {
         if (line == null) {
             return null;
         }
 
         try {
             Object ret = eval.invoke(line);
+
+            writer.flush();
+            reader.getOutput().flush();
+
             output3.set(output2.deref());
             output2.set(output1.deref());
             output1.set(ret);

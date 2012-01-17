@@ -4,6 +4,7 @@ import clojure.lang.LazySeq;
 import clojure.lang.RT;
 import clojure.lang.Var;
 import jline.console.completer.Completer;
+import jline.internal.Log;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -82,10 +83,15 @@ class ClojureCompleter implements Completer {
             }
         }
 
-        LazySeq results = (LazySeq) completions.invoke(symbolToComplete);
-        for (Object result : asList(results.toArray())) {
-            candidates.add((String) result);
+        try {
+            LazySeq results = (LazySeq) completions.invoke(symbolToComplete);
+            for (Object result : asList(results.toArray())) {
+                candidates.add((String) result);
+            }
+            return matchStart;
+        } catch (RuntimeException re) {
+            return 0;
         }
-        return matchStart;
+
     }
 }
