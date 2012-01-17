@@ -202,7 +202,9 @@ public class Main {
     }
 
     public void preamble() throws IOException {
-        reader.println("Clojure 1.3.0");
+        String clojureVersion = (String) RT.var("clojure.core", "clojure-version").invoke();
+
+        reader.println("Clojure " + clojureVersion);
         reader.println();
         reader.println("IClojure 1.0 -- an enhanced Interactive Clojure");
         reader.println("?         -> Introduction and overview of IClojure's features");
