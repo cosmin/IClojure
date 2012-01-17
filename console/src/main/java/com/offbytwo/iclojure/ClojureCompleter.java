@@ -40,30 +40,39 @@ class ClojureCompleter implements Completer {
         } else if (buffer.startsWith("%d")) {
             matchStart = 3;
             symbolToComplete = buffer.substring(matchStart);
-        } else if (buffer.startsWith("(. ")) {
-            String prefix;
-            if (buffer.lastIndexOf(' ') == cursor - 1) {
-                prefix = "";
-                matchStart = cursor;
-            } else {
-                prefix = buffer.substring(buffer.lastIndexOf(' ') + 1);
-                matchStart = buffer.lastIndexOf(' ') + 1;
+        } else {
+            matchStart = 0;
+
+            if (buffer.startsWith(" ")) {
+                String trimmed = buffer.trim();
+                matchStart += buffer.indexOf(trimmed.charAt(0));
+                buffer = buffer.substring(matchStart);
             }
 
-            String form = buffer.replaceFirst("\\(\\. ", "").trim();
-            Object output = eval.invoke(RT.readString(form));
-            for (Method m : output.getClass().getMethods()) {
-                if (m.getName().startsWith(prefix)) {
-                    candidates.add(m.getName());
+            if (buffer.startsWith("(. ")) {
+                String prefix;
+                if (buffer.lastIndexOf(' ') == cursor - 1) {
+                    prefix = "";
+                    matchStart = cursor;
+                } else {
+                    prefix = buffer.substring(buffer.lastIndexOf(' ') + 1);
+                    matchStart += buffer.lastIndexOf(' ') + 1;
                 }
+
+                String form = buffer.replaceFirst("\\(\\. ", "").trim();
+                Object output = eval.invoke(RT.readString(form));
+                for (Method m : output.getClass().getMethods()) {
+                    if (m.getName().startsWith(prefix)) {
+                        candidates.add(m.getName());
+                    }
+                }
+                return matchStart;
+            } else if (buffer.startsWith("(")) {
+                symbolToComplete = buffer.replaceFirst("\\(", "");
+                matchStart += 1;
+            } else {
+                symbolToComplete = buffer;
             }
-            return matchStart;
-        } else if (buffer.startsWith("(")) {
-            symbolToComplete = buffer.replaceFirst("\\(", "");
-            matchStart = 1;
-        } else {
-            symbolToComplete = buffer;
-            matchStart = 0;
         }
 
         LazySeq results = (LazySeq) completions.invoke(symbolToComplete);
