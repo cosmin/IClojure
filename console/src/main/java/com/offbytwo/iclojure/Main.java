@@ -1,6 +1,5 @@
 package com.offbytwo.iclojure;
 
-import clojure.lang.LazySeq;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
@@ -9,13 +8,8 @@ import com.offbytwo.iclojure.shortcuts.DescribeJavaObjectHandler;
 import com.offbytwo.iclojure.signals.ControlCSignalHandler;
 import com.offbytwo.iclojure.signals.RestoreTerminalHook;
 import jline.console.ConsoleReader;
-import jline.console.completer.Completer;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import static java.util.Arrays.asList;
 
 
 public class Main {
@@ -23,8 +17,7 @@ public class Main {
     private int inputNumber;
     private String namespace;
     private Var ns;
-    private Var eval;
-    final private Var completions;
+    private Var eval = RT.var("clojure.core", "eval");
 
     private StringBuffer inputSoFar = new StringBuffer();
     private DescribeJavaObjectHandler describeHandler;
@@ -37,7 +30,7 @@ public class Main {
         describeHandler = new DescribeJavaObjectHandler(reader);
 
         this.ns = RT.var("clojure.core", "*ns*");
-        this.eval = RT.var("clojure.core", "eval");
+
 
         Var.pushThreadBindings(RT.map(ns, ns.deref()));
         RT.var("clojure.core", "in-ns").invoke(Symbol.create(null, "user"));
@@ -48,61 +41,9 @@ public class Main {
         use.invoke(RT.readString("[clojure.java.javadoc :only (javadoc)]"));
         use.invoke(RT.readString("[clojure.pprint :only (pprint)]"));
 
-        RT.load("complete");
-        this.completions = RT.var("complete", "completions");
 
-        reader.addCompleter(new Completer() {
-            public int complete(String buffer, int cursor, List<CharSequence> candidates) {
-                String symbolToComplete;
-                int matchStart;
 
-                if (cursor <= buffer.length()) {
-                    buffer = buffer.substring(0, cursor);
-                }
-
-                if (buffer.startsWith("?")) {
-                    matchStart = 1;
-                    if (buffer.startsWith("??")) {
-                        matchStart = 2;
-                    }
-
-                    symbolToComplete = buffer.substring(matchStart);
-                } else if (buffer.startsWith("%d")) {
-                    matchStart = 3;
-                    symbolToComplete = buffer.substring(matchStart);
-                } else if (buffer.startsWith("(. ")) {
-                    String prefix;
-                    if (buffer.lastIndexOf(' ') == cursor - 1) {
-                        prefix = "";
-                        matchStart = cursor;
-                    } else {
-                        prefix = buffer.substring(buffer.lastIndexOf(' ') + 1);
-                        matchStart = buffer.lastIndexOf(' ') + 1;
-                    }
-
-                    String form = buffer.replaceFirst("\\(\\. ", "").trim();
-                    Object output = eval.invoke(RT.readString(form));
-                    for (Method m : output.getClass().getMethods()) {
-                        if (m.getName().startsWith(prefix)) {
-                            candidates.add(m.getName());
-                        }
-                    }
-                    return matchStart;
-                } else if (buffer.startsWith("(")) {
-                    symbolToComplete = buffer.replaceFirst("\\(", "");
-                    matchStart = 1;
-                } else {
-                    symbolToComplete = buffer;
-                    matchStart = 0;
-                }
-
-                LazySeq results = (LazySeq) completions.invoke(symbolToComplete);
-                for (Object result : asList(results.toArray())) {
-                    candidates.add((String) result);
-                }
-                return matchStart;
-            }
-        });
+        reader.addCompleter(new ClojureCompleter());
     }
 
     public void abortCurrentRead() throws IOException {
