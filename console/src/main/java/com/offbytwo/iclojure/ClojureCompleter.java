@@ -50,23 +50,30 @@ class ClojureCompleter implements Completer {
             }
 
             if (buffer.startsWith("(. ")) {
-                String prefix;
-                if (buffer.lastIndexOf(' ') == cursor - 1) {
-                    prefix = "";
-                    matchStart = cursor;
-                } else {
-                    prefix = buffer.substring(buffer.lastIndexOf(' ') + 1);
-                    matchStart += buffer.lastIndexOf(' ') + 1;
-                }
-
-                String form = buffer.replaceFirst("\\(\\. ", "").trim();
-                Object output = eval.invoke(RT.readString(form));
-                for (Method m : output.getClass().getMethods()) {
-                    if (m.getName().startsWith(prefix)) {
-                        candidates.add(m.getName());
+                if (buffer.lastIndexOf(' ') > 2) {
+                    // there is a previous form
+                    String prefix;
+                    if (buffer.lastIndexOf(' ') == cursor - 1) {
+                        prefix = "";
+                        matchStart = cursor;
+                    } else {
+                        prefix = buffer.substring(buffer.lastIndexOf(' ') + 1);
+                        matchStart += buffer.lastIndexOf(' ') + 1;
                     }
+
+                    String form = buffer.replaceFirst("\\(\\. ", "").trim();
+                    Object output = eval.invoke(RT.readString(form));
+                    for (Method m : output.getClass().getMethods()) {
+                        if (m.getName().startsWith(prefix)) {
+                            candidates.add(m.getName());
+                        }
+                    }
+                    return matchStart;
+                } else {
+                    // this is the first form we are trying to complete
+                    matchStart += 3;
+                    symbolToComplete = buffer.substring(3);
                 }
-                return matchStart;
             } else if (buffer.startsWith("(")) {
                 symbolToComplete = buffer.replaceFirst("\\(", "");
                 matchStart += 1;
