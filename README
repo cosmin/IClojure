@@ -2,6 +2,10 @@ IClojure is an Interactive Clojure repl, inspired by IPython.
 
 License: Eclipse Public License (EPL), same as Clojure.
 
+Getting started:
+
+* wget https://github.com/downloads/cosmin/IClojure/iclojure-1.0-SNAPSHOT.jar
+* java -jar iclojure-1.0-SNAPSHOT.jar
 
 Features:
 
@@ -17,7 +21,6 @@ Tab completion:
 * method invocations
 * "(.method" completion for all java methods for any of the classes in the current namespace
 * "(. object method" completion for all the methods of the object (or a form that evaluates to an object)
-
 
 Other shorthands:
 
