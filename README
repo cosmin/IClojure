@@ -9,7 +9,7 @@ Features:
 * Shorthand for source and doc
 * Shorthand for introspecting Java objects and classes via reflection
 * Proper Control-C handling, although not very portable
-
+* persist history across sessions to ~/.iclojure_history
 
 Tab completion:
 
@@ -29,5 +29,4 @@ Roadmap:
 
 * input caching, similar to IPython
 * output caching, similar to IPython
-* persist history across sessions to ~/.iclojure_history
 * more advanced auto-completions

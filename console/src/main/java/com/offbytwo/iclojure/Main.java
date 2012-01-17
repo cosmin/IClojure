@@ -8,7 +8,11 @@ import com.offbytwo.iclojure.shortcuts.DescribeJavaObjectHandler;
 import com.offbytwo.iclojure.signals.ControlCSignalHandler;
 import com.offbytwo.iclojure.signals.RestoreTerminalHook;
 import jline.console.ConsoleReader;
+import jline.console.history.FileHistory;
+import jline.console.history.History;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
+import java.io.File;
 import java.io.IOException;
 
 
@@ -151,6 +155,9 @@ public class Main {
 
         try {
             final ConsoleReader reader = new ConsoleReader();
+
+            configureHistory(reader);
+
             new RestoreTerminalHook(reader).install();
             final Main main = new Main(reader);
             new ControlCSignalHandler(main).install();
@@ -164,6 +171,13 @@ public class Main {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void configureHistory(ConsoleReader reader) throws IOException {
+        String homeFolder = System.getProperty("user.home");
+        File historyFile = new File(homeFolder, ".iclojure_history");
+        reader.setHistory(new FileHistory(historyFile));
+        reader.setHistoryEnabled(true);
     }
 
     public void preamble() throws IOException {
