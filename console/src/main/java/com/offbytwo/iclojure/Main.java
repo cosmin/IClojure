@@ -25,11 +25,23 @@ public class Main {
 
     private StringBuffer inputSoFar = new StringBuffer();
     private DescribeJavaObjectHandler describeHandler;
+    private Var output1;
+    private Var output2;
+    private Var output3;
+    private Var lastError;
+    private Var set;
 
     public Main(ConsoleReader reader) throws ClassNotFoundException, IOException {
         this.reader = reader;
         this.inputNumber = 0;
         this.namespace = "user";
+
+        this.output1 = RT.var("clojure.core", "*1");
+        this.output2 = RT.var("clojure.core", "*2");
+        this.output3 = RT.var("clojure.core", "*3");
+        this.lastError = RT.var("clojure.core", "*e");
+
+        this.set = RT.var("clojure.core", "set!");
 
         describeHandler = new DescribeJavaObjectHandler(reader);
 
@@ -37,6 +49,11 @@ public class Main {
 
 
         Var.pushThreadBindings(RT.map(ns, ns.deref()));
+        Var.pushThreadBindings(RT.map(output1, null));
+        Var.pushThreadBindings(RT.map(output2, null));
+        Var.pushThreadBindings(RT.map(output3, null));
+        Var.pushThreadBindings(RT.map(lastError, null));
+
         RT.var("clojure.core", "in-ns").invoke(Symbol.create(null, "user"));
 
         Var use = RT.var("clojure.core", "use");
@@ -115,10 +132,14 @@ public class Main {
 
         try {
             Object ret = eval.invoke(line);
+            output3.set(output2.deref());
+            output2.set(output1.deref());
+            output1.set(ret);
             return RT.printString(ret);
         } catch (RuntimeException re) {
             // TODO print smarter stack traces here
             re.printStackTrace();
+            lastError.set(re);
             return null;
         }
     }
