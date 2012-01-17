@@ -7,6 +7,22 @@ Getting started:
 * wget https://github.com/downloads/cosmin/IClojure/iclojure-1.0-SNAPSHOT.jar
 * java -jar iclojure-1.0-SNAPSHOT.jar
 
+Development:
+
+* This currently needs a patched version of JLine2 for development, from https://github.com/cosmin/jline2
+
+  git checkout https://github.com/cosmin/jline2
+  cd jline2
+  mvn clean install
+
+  git checkout https://github.com/cosmin/IClojure
+  cd IClojure
+  mvn compile exec:java
+
+* To build a self-container jar
+
+  mvn clean package
+
 Features:
 
 * Tab completion, based on http://github.com/ninjudd/clojure-complete, itself based on swank-clojure.
