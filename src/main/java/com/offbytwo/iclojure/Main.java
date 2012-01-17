@@ -9,9 +9,9 @@ import com.offbytwo.iclojure.signals.ControlCSignalHandler;
 import com.offbytwo.iclojure.signals.RestoreTerminalHook;
 import jline.console.ConsoleReader;
 import jline.console.history.FileHistory;
-import jline.console.history.History;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -31,7 +31,7 @@ public class Main {
     private Var lastError;
     private Var set;
 
-    public Main(ConsoleReader reader) throws ClassNotFoundException, IOException {
+    public Main(final ConsoleReader reader) throws ClassNotFoundException, IOException {
         this.reader = reader;
         this.inputNumber = 0;
         this.namespace = "user";
@@ -61,7 +61,6 @@ public class Main {
         use.invoke(RT.readString("[clojure.repl :only (source apropos dir pst doc find-doc)]"));
         use.invoke(RT.readString("[clojure.java.javadoc :only (javadoc)]"));
         use.invoke(RT.readString("[clojure.pprint :only (pprint)]"));
-
 
 
         reader.addCompleter(new ClojureCompleter());
@@ -107,7 +106,7 @@ public class Main {
             } else {
                 return RT.readString("(doc " + line.replace("?", "") + ")");
             }
-        } else if (line.trim().equals("") ) {
+        } else if (line.trim().equals("")) {
             return null;
         } else {
             try {
@@ -176,6 +175,30 @@ public class Main {
 
         try {
             final ConsoleReader reader = new ConsoleReader();
+
+            reader.getKeys().bind("\4", new ActionListener() {
+                public void actionPerformed(ActionEvent actionEvent) {
+                    try {
+                        if (reader.getCursorBuffer().cursor == 0 && reader.getCursorBuffer().length() == 0) {
+                            System.out.print("\nDo you really want to exit ([y]/n)? ");
+                            char input = (char) reader.readCharacter('y', 'n', (char) 10);
+
+                            if (input != 'n') {
+                                System.exit(1);
+                            } else {
+                                System.out.println();
+                                reader.redrawLine();
+                                reader.flush();
+                            }
+                        } else {
+                            reader.delete();
+                            reader.flush();
+                        }
+                    } catch (IOException e) {
+                        //
+                    }
+                }
+            });
 
             configureHistory(reader);
 
