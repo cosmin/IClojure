@@ -106,8 +106,33 @@ public class Main {
             throw new StopInputException();
         } else if (line.startsWith("%")) {
             if (line.startsWith("%d")) {
-                Object input = RT.readString(line.replace("%d", "").trim());
-                describeHandler.describe(eval.invoke(input));
+                if (line.replace("%d", "").trim().length() == 0) {
+                    Object output = output1.deref();
+                    if (output instanceof Var) {
+                        describeHandler.describe(((Var)output).deref());
+                    } else {
+                        describeHandler.describe(output);
+                    }
+                    return null;
+                }
+
+                Object input;
+                try {
+                    input = RT.readString(line.replace("%d", "").trim());
+                } catch (RuntimeException re) {
+                    reader.println("Error: unable to read form after %d");
+                    return null;
+                }
+                Object output;
+
+                try {
+                    output = eval.invoke(input);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    reader.println("Error: unable to evaluate form after %d");
+                    return null;
+                }
+                describeHandler.describe(output);
             } else {
                 reader.println("Unknown command!");
             }
