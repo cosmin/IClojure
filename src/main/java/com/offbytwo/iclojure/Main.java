@@ -93,12 +93,27 @@ public class Main {
     }
 
     private Object read() throws IOException, StopInputException {
-        String line;
+        String line = null;
 
-        if (inputSoFar.length() > 0) {
-            line = reader.readLine("... ");
-        } else {
-            line = reader.readLine(String.format("%s[%d]: ", namespace, inputNumber));
+        while( line == null) {
+            if (inputSoFar.length() > 0) {
+                line = reader.readLine("... ");
+            } else {
+                line = reader.readLine(String.format("%s[%d]: ", namespace, inputNumber));
+            }
+
+            if (line == null) {
+                System.out.print("\nDo you really want to exit ([y]/n)? ");
+                char input = (char) reader.readCharacter('y', 'n', (char) 10);
+
+                if (input != 'n') {
+                    System.exit(1);
+                } else {
+                    System.out.println();
+                    System.out.println();
+                    reader.flush();
+                }
+            }
         }
 
         if (line.equals("exit")) {
@@ -109,7 +124,7 @@ public class Main {
                 if (line.replace("%d", "").trim().length() == 0) {
                     Object output = output1.deref();
                     if (output instanceof Var) {
-                        describeHandler.describe(((Var)output).deref());
+                        describeHandler.describe(((Var) output).deref());
                     } else {
                         describeHandler.describe(output);
                     }
@@ -217,30 +232,6 @@ public class Main {
 
         try {
             final ConsoleReader reader = new ConsoleReader();
-
-            reader.getKeys().bind("\4", new ActionListener() {
-                public void actionPerformed(ActionEvent actionEvent) {
-                    try {
-                        if (reader.getCursorBuffer().cursor == 0 && reader.getCursorBuffer().length() == 0) {
-                            System.out.print("\nDo you really want to exit ([y]/n)? ");
-                            char input = (char) reader.readCharacter('y', 'n', (char) 10);
-
-                            if (input != 'n') {
-                                System.exit(1);
-                            } else {
-                                System.out.println();
-                                reader.redrawLine();
-                                reader.flush();
-                            }
-                        } else {
-                            reader.delete();
-                            reader.flush();
-                        }
-                    } catch (IOException e) {
-                        //
-                    }
-                }
-            });
 
             configureHistory(reader);
 
