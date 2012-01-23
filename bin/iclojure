@@ -1,0 +1,29 @@
+#!/bin/sh
+
+ICLOJURE_HOME="~/.iclojure/"
+ICLOJURE_JAR=${ICLOJURE_HOME}/iclojure.jar
+ICLOJURE_DOWNLOAD_URL="http://clk.tc/iclojure-latest.jar"
+
+if ! test -d $ICLOJURE_HOME; then
+    mkdir -p $ICLOJURE_HOME
+fi
+
+if ! test -f $ICLOJURE_JAR; then
+    echo "Downloading latest IClojure jar from $ICLOJURE_DOWNLOAD_URL"
+    curl -L $ICLOJURE_DOWNLOAD_URL > $ICLOJURE_JAR
+fi
+
+if [ -n "$JAVA_HOME" ]; then
+    JAVA="$JAVA_HOME/bin/java"
+else
+    JAVA=$(which java)
+fi
+
+if [ -z "$JAVA" ]; then
+    echo "Cannot locate java. Either set JAVA_HOME or add java to PATH"
+    exit 1
+elif ! test -x $JAVA; then
+    echo "Cannot locate java. Either set JAVA_HOME or add java to PATH"
+fi
+
+$JAVA -client -jar $ICLOJURE_JAR
