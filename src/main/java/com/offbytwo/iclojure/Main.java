@@ -10,12 +10,13 @@ import com.offbytwo.iclojure.signals.RestoreTerminalHook;
 import jline.console.ConsoleReader;
 import jline.console.history.FileHistory;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+
+import static com.offbytwo.iclojure.ColoredText.*;
+import static org.fusesource.jansi.Ansi.Color.*;
 
 
 public class Main {
@@ -31,7 +32,6 @@ public class Main {
     private Var output2;
     private Var output3;
     private Var lastError;
-    private Var set;
     private OutputStreamWriter writer;
 
     public Main(final ConsoleReader reader) throws ClassNotFoundException, IOException {
@@ -43,8 +43,6 @@ public class Main {
         this.output2 = RT.var("clojure.core", "*2");
         this.output3 = RT.var("clojure.core", "*3");
         this.lastError = RT.var("clojure.core", "*e");
-
-        this.set = RT.var("clojure.core", "set!");
 
         describeHandler = new DescribeJavaObjectHandler(reader);
 
@@ -86,7 +84,7 @@ public class Main {
         if (this.inputSoFar.length() > 0) {
             this.inputSoFar = new StringBuffer();
             this.reader.println();
-            this.reader.setPrompt(String.format("%s[%d]: ", namespace, inputNumber));
+            this.reader.setPrompt(getPrompt());
             this.reader.redrawLine();
             this.reader.flush();
         }
@@ -99,7 +97,7 @@ public class Main {
             if (inputSoFar.length() > 0) {
                 line = reader.readLine("... ");
             } else {
-                line = reader.readLine(String.format("%s[%d]: ", namespace, inputNumber));
+                line = reader.readLine(getPrompt());
             }
 
             if (line == null) {
@@ -177,6 +175,25 @@ public class Main {
         return null;
     }
 
+    private String getPrompt() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(color(BLUE, String.format("%s[", namespace)));
+        sb.append(colorBright(BLUE, String.valueOf(inputNumber)));
+        sb.append(color(BLUE, "]: "));
+        sb.append(revertToDefaultColor());
+        return sb.toString();
+    }
+
+    private String getOutputPrompt() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(color(RED, String.format("%s[", namespace)));
+        sb.append(colorBright(RED, String.valueOf(inputNumber)));
+        sb.append(color(RED, "]= "));
+        sb.append(revertToDefaultColor());
+        return sb.toString();
+    }
+
+
     private String eval(Object line) throws StopInputException, IOException {
         if (line == null) {
             return null;
@@ -202,7 +219,8 @@ public class Main {
 
     private void print(String output) throws IOException {
         if (output != null) {
-            reader.println(String.format("%s[%d]= %s", namespace, inputNumber, output));
+            reader.print(getOutputPrompt());
+            reader.println(output);
         }
         reader.println();
     }
