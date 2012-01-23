@@ -1,4 +1,4 @@
-package com.offbytwo.iclojure;
+package com.offbytwo.iclojure.completion;
 
 import clojure.lang.LazySeq;
 import clojure.lang.RT;
@@ -12,7 +12,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 
-class ClojureCompleter implements Completer {
+public class ClojureCompleter implements Completer {
     private final Var eval;
     private final Var completions;
 

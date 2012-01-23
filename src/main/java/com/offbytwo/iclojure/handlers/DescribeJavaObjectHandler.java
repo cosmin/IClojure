@@ -1,4 +1,4 @@
-package com.offbytwo.iclojure.shortcuts;
+package com.offbytwo.iclojure.handlers;
 
 import jline.console.ConsoleReader;
 

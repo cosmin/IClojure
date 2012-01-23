@@ -1,6 +1,7 @@
 package com.offbytwo.iclojure.signals;
 
 import com.offbytwo.iclojure.Main;
+import com.offbytwo.iclojure.repl.IClojureRepl;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
@@ -8,11 +9,11 @@ import java.io.IOException;
 
 public class ControlCSignalHandler implements SignalHandler {
 
-    private Main main;
+    private IClojureRepl repl;
 
-    public ControlCSignalHandler(Main main) {
+    public ControlCSignalHandler(IClojureRepl repl) {
 
-        this.main = main;
+        this.repl = repl;
     }
 
     public void install() {
@@ -22,7 +23,7 @@ public class ControlCSignalHandler implements SignalHandler {
 
     public void handle(Signal signal) {
         try {
-            main.abortCurrentRead();
+            repl.abortCurrentRead();
         } catch (IOException e) {
             //
         }
