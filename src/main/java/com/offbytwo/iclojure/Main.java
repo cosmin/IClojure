@@ -70,12 +70,12 @@ public class Main {
 
         Var use = RT.var("clojure.core", "use");
 
-        use.invoke(RT.readString("[clojure.repl :only (source apropos dir pst doc find-doc)]"));
+        use.invoke(RT.readString("[clojure.repl :only (source apropos dir doc find-doc)]"));
         use.invoke(RT.readString("[clojure.java.javadoc :only (javadoc)]"));
         use.invoke(RT.readString("[clojure.pprint :only (pprint)]"));
+        use.invoke(RT.readString("[clj-stacktrace.repl :only (pst)]"));
 
-        this.pst = RT.var("clojure.repl", "pst");
-
+        this.pst = RT.var("clj-stacktrace.repl", "pst");
 
         reader.addCompleter(new ClojureCompleter());
     }
