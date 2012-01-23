@@ -295,9 +295,14 @@ public class Main {
     public void preamble() throws IOException {
         String clojureVersion = (String) RT.var("clojure.core", "clojure-version").invoke();
 
+        String iClojureVersion = getClass().getPackage().getImplementationVersion();
+        if (iClojureVersion == null) {
+            iClojureVersion = "DEV";
+        }
+
         reader.println("Clojure " + clojureVersion);
         reader.println();
-        reader.println("IClojure 1.0 -- an enhanced Interactive Clojure");
+        reader.println("IClojure " + iClojureVersion + " -- an enhanced Interactive Clojure");
         reader.println("?         -> Introduction and overview of IClojure's features");
         reader.println("?symbol   -> Print documentation for symbol");
         reader.println("??symbol  -> Show source of function or macro");
