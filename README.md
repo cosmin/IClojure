@@ -8,8 +8,8 @@ Eclipse Public License (EPL), same as Clojure.
 
 ## Getting started
 
-    wget https://github.com/downloads/cosmin/IClojure/iclojure-1.0-SNAPSHOT.jar
-    java -jar iclojure-1.0-SNAPSHOT.jar
+    wget https://github.com/downloads/cosmin/IClojure/iclojure-1.0.1-20120123-41.jar
+    java -jar iclojure-1.0.1-20120123-41.jar
 
 ## Development
 
