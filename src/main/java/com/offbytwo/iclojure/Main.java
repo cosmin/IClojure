@@ -33,6 +33,7 @@ public class Main {
     private Var output3;
     private Var lastError;
     private OutputStreamWriter writer;
+    private Var pst;
 
     public Main(final ConsoleReader reader) throws ClassNotFoundException, IOException {
         this.reader = reader;
@@ -72,6 +73,8 @@ public class Main {
         use.invoke(RT.readString("[clojure.repl :only (source apropos dir pst doc find-doc)]"));
         use.invoke(RT.readString("[clojure.java.javadoc :only (javadoc)]"));
         use.invoke(RT.readString("[clojure.pprint :only (pprint)]"));
+
+        this.pst = RT.var("clojure.repl", "pst");
 
 
         reader.addCompleter(new ClojureCompleter());
@@ -210,11 +213,25 @@ public class Main {
             output1.set(ret);
             return RT.printString(ret);
         } catch (RuntimeException re) {
-            // TODO print smarter stack traces here
-            re.printStackTrace();
             lastError.set(re);
+            printStackTrace(re);
             return null;
         }
+    }
+
+    private void printStackTrace(RuntimeException re) throws IOException {
+        reader.println(color(RED, "---------------------------------------------------------------------------"));
+        reader.print(revertToDefaultColor());
+        reader.flush();
+        pst.invoke(re);
+        reader.println();
+        StringBuffer sb = new StringBuffer();
+        sb.append(color(RED, re.getClass().getSimpleName()));
+        sb.append(revertToDefaultColor());
+        sb.append(": ");
+        sb.append(re.getLocalizedMessage());
+        reader.println(sb.toString());
+        reader.flush();
     }
 
     private void print(String output) throws IOException {
