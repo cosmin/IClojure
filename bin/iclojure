@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ICLOJURE_HOME="~/.iclojure/"
+ICLOJURE_HOME=~/.iclojure/
 ICLOJURE_JAR=${ICLOJURE_HOME}/iclojure.jar
 ICLOJURE_DOWNLOAD_URL="http://clk.tc/iclojure-latest.jar"
 
