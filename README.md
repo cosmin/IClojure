@@ -8,14 +8,26 @@ Eclipse Public License (EPL), same as Clojure.
 
 ## Getting started
 
-    wget https://github.com/downloads/cosmin/IClojure/iclojure-1.0.1-20120123-41.jar
-    java -jar iclojure-1.0.1-20120123-41.jar
+```
+curl -O -L http://clk.tc/iclojure-latest.jar
+java -jar iclojure-latest.jar
+```
+
+Alternatively, you can download the following script, mark it executable and put it somewhere in path
+
+```
+curl -O https://raw.github.com/cosmin/IClojure/master/bin/iclojure
+chmod +x iclojure
+sudo mv iclojure /usr/local/bin
+```
+
+Then you can simply launch `iclojure` at any time.
 
 ## Development
 
     git checkout https://github.com/cosmin/IClojure
     cd IClojure
-    ./run.sh
+    bin/run.sh
 
 ## Package
 
