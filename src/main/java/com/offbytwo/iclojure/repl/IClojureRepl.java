@@ -8,6 +8,7 @@ import com.offbytwo.iclojure.exceptions.StopInputException;
 import com.offbytwo.iclojure.handlers.DescribeJavaObjectHandler;
 import com.offbytwo.iclojure.util.ConsoleOutputStreamWriter;
 import jline.console.ConsoleReader;
+import org.fusesource.jansi.AnsiString;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -206,9 +207,19 @@ public class IClojureRepl {
     private String readLine() throws IOException {
         String line = null;
 
+        int promptLength = new AnsiString(getPrompt()).length();
+
+        StringBuffer morePrompt = new StringBuffer();
+        for (int i = 0; i < promptLength - 5; i++) {
+            morePrompt.append(" ");
+        }
+        morePrompt.append(color(BLUE, "...: "));
+        morePrompt.append(revertToDefaultColor());
+
+
         while (line == null) {
             if (inputSoFar.length() > 0) {
-                line = reader.readLine("... ");
+                line = reader.readLine(morePrompt.toString());
             } else {
                 line = reader.readLine(getPrompt());
             }
