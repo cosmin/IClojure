@@ -7,12 +7,14 @@ import com.offbytwo.iclojure.InputOutputCache;
 import com.offbytwo.iclojure.completion.ClojureCompleter;
 import com.offbytwo.iclojure.exceptions.StopInputException;
 import com.offbytwo.iclojure.handlers.DescribeJavaObjectHandler;
+import com.offbytwo.iclojure.util.ClassFinder;
 import com.offbytwo.iclojure.util.ConsoleOutputStreamWriter;
 import jline.console.ConsoleReader;
 import org.fusesource.jansi.AnsiString;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Set;
 
 import static clojure.lang.RT.*;
 import static com.offbytwo.iclojure.InputOutput.ColoredText.*;
@@ -38,6 +40,7 @@ public class IClojureRepl {
     private Var pst;
     private OutputStreamWriter writer;
     private InputOutputCache ioCache = new InputOutputCache(1000);
+    private ClassFinder classFinder;
 
 
     public IClojureRepl(final ConsoleReader reader) throws ClassNotFoundException, IOException {
@@ -213,6 +216,34 @@ public class IClojureRepl {
                 return null;
             }
             describeHandler.describe(output);
+        } else if (line.startsWith("%f")) {
+            String searchFor = line.replace("%f", "").trim();
+            String className = "";
+            String packageName = "";
+
+            if (searchFor.contains(" ")) {
+                String[] components = searchFor.split(" ");
+                className = components[0];
+                packageName = components[1];
+            } else {
+                className = searchFor;
+            }
+
+
+            if (classFinder == null) {
+                classFinder = new ClassFinder();
+            }
+
+            Set<String> matches;
+
+            if (searchFor.contains("*") || searchFor.contains("?")) {
+                matches = classFinder.findClassesInPackageByName(packageName, className);
+            } else {
+                matches = classFinder.findClassesInPackageByGlob(packageName, className);
+            }
+
+            reader.printColumns(matches);
+
         } else {
             reader.println("Unknown command!");
         }

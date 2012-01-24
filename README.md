@@ -62,9 +62,13 @@ In addition to the Clojure convention of caching the last 3 output in `*1`, `*2`
 
 ## Other shorthands
 
-    ?symbol    => (doc symbol)
-    ??symbol   => (source symbol)
-    %d symbol  => show constructors, methods and fields of the given object or Class
+```
+    ?symbol          => (doc symbol)
+    ??symbol         => (source symbol)
+    %d symbol        => show constructors, methods and fields of the given object or Class
+    %f class         => find all classes matching this name (supports globs)
+    %f class package => like the above, but restrict search to the given package
+```
 
 ## Roadmap
 
