@@ -3,6 +3,7 @@ package com.offbytwo.iclojure.repl;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
+import com.offbytwo.iclojure.InputOutputCache;
 import com.offbytwo.iclojure.completion.ClojureCompleter;
 import com.offbytwo.iclojure.exceptions.StopInputException;
 import com.offbytwo.iclojure.handlers.DescribeJavaObjectHandler;
@@ -36,6 +37,8 @@ public class IClojureRepl {
     private Var lastError = var("clojure.core", "*e");
     private Var pst;
     private OutputStreamWriter writer;
+    private InputOutputCache ioCache = new InputOutputCache(1000);
+
 
     public IClojureRepl(final ConsoleReader reader) throws ClassNotFoundException, IOException {
         this.reader = reader;
@@ -73,21 +76,22 @@ public class IClojureRepl {
                 if (re.getMessage().startsWith("EOF while reading")) {
                     inputSoFar.append(line + " ");
                     return null;
+                } else {
+                    re.printStackTrace();
+                    return null;
                 }
             }
         }
-
-        return null;
     }
 
-    private String eval(Object line) throws StopInputException, IOException {
+    private Object eval(Object line) throws StopInputException, IOException {
         try {
             Object ret = eval.invoke(line);
 
             writer.flush();
             reader.getOutput().flush();
-            captureLast3Outputs(ret);
-            return RT.printString(ret);
+
+            return ret;
         } catch (RuntimeException re) {
             lastError.set(re);
             printStackTrace(re);
@@ -96,17 +100,18 @@ public class IClojureRepl {
     }
 
 
-    private void print(String output) throws IOException {
+    private void print(Object output) throws IOException {
         if (output != null) {
             reader.print(getOutputPrompt());
-            reader.println(output);
+            RT.printString(output);
+            reader.println(RT.printString(output));
         }
         reader.println();
     }
 
     public void loop() {
         Object input;
-        String output;
+        Object output;
 
         try {
             while (true) {
@@ -116,6 +121,7 @@ public class IClojureRepl {
                     continue;
                 }
                 output = eval(input);
+                cacheInputOutput(input, output);
                 print(output);
             }
         } catch (IOException ioe) {
@@ -123,6 +129,11 @@ public class IClojureRepl {
         } catch (StopInputException e) {
             //
         }
+    }
+
+    private void cacheInputOutput(Object input, Object output) {
+        captureLast3Outputs(output);
+        ioCache.add(input, output);
     }
 
     private void createUserNamespace() {
@@ -135,13 +146,18 @@ public class IClojureRepl {
     }
 
     private void createNecessaryThreadBindings() {
+
+        var("user", "input").bindRoot(ioCache.getInputLookupFn());
+        var("user", "output").bindRoot(ioCache.getOutputLookupFn());
+
         Var.pushThreadBindings(map(
                 var("clojure.core", "*out*"), writer,
                 ns, ns.deref(),
                 output1, null,
                 output2, null,
                 output3, null,
-                lastError, null));
+                lastError, null
+        ));
     }
 
     public void abortCurrentRead() throws IOException {
@@ -290,6 +306,9 @@ public class IClojureRepl {
         reader.println("pst         => print stack trace of the given exception");
         reader.println("pp          => pretty print the last value");
         reader.println("pprint      => pretty print the given value");
+        reader.println();
+        reader.println("(input i)   => return the input from line i");
+        reader.println("(output i)  => return the output from line i");
     }
 
 

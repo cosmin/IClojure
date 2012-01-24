@@ -40,6 +40,7 @@ Then you can simply launch `iclojure` at any time.
 - Shorthand for introspecting Java objects and classes via reflection
 - Proper Control-C handling, although not very portable
 - persist history across sessions to ~/.iclojure_history
+- input and output caching of last 1000 elements
 
 ## Tab completion
 
@@ -50,6 +51,15 @@ Then you can simply launch `iclojure` at any time.
 - namespaces
 - java classes
 
+## Input / output caching
+
+In addition to the Clojure convention of caching the last 3 output in `*1`, `*2` and `*3` IClojure also caches the last 1000 input and output
+
+```
+(input 102) ; => returns the input from line 102
+(output 102) ; => returns the output from line 102
+```
+
 ## Other shorthands
 
     ?symbol    => (doc symbol)
@@ -58,8 +68,6 @@ Then you can simply launch `iclojure` at any time.
 
 ## Roadmap
 
-- input caching, similar to IPython
-- output caching, similar to IPython
 - tab completion for import, require and use forms
 - abort long runing tasks with Ctrl+C
 - better stack traces
