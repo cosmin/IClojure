@@ -1,5 +1,7 @@
 package com.offbytwo.iclojure;
 
+import clojure.lang.Compiler;
+import clojure.lang.RT;
 import com.offbytwo.iclojure.repl.IClojureRepl;
 import com.offbytwo.iclojure.signals.ControlCSignalHandler;
 import com.offbytwo.iclojure.signals.RestoreTerminalHook;
@@ -13,7 +15,37 @@ import static clojure.lang.RT.var;
 
 
 public class Main {
+
+    public static void usage() {
+        System.out.println("Usage: java -cp iclojure.jar [com.offbytwo.iclojure.Main] [-i file]\n" +
+                "\n" +
+                "  With no options or args, runs an interactive Read-Eval-Print Loop\n" +
+                "\n" +
+                "    -i, --init path     Load a file or resource");
+    }
+
+    public static String getFileToLoad(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            String currentArg = args[i];
+            if (currentArg.equals("-i")) {
+                if (i < args.length - 1) {
+                    return args[i + 1];
+                } else {
+                    usage();
+                    System.exit(1);
+                }
+            } else if (currentArg.equals("-h") || currentArg.equals("--help")) {
+                usage();
+                System.exit(0);
+            }
+        }
+
+        return null;
+    }
+
     public static void main(String[] args) {
+
+
 
         try {
             final ConsoleReader reader = new ConsoleReader();
@@ -26,6 +58,7 @@ public class Main {
             new ControlCSignalHandler(repl).install();
 
             preamble(reader);
+            loadRequestedScripts(args);
             repl.loop();
 
         } catch (IOException e) {
@@ -35,6 +68,27 @@ public class Main {
             e.printStackTrace();
         } finally {
             var("clojure.core", "shutdown-agents").invoke();
+        }
+    }
+
+    private static void loadRequestedScripts(String[] args) {
+        String fileToLoad = getFileToLoad(args);
+        if (fileToLoad != null && fileToLoad.length() > 1) {
+            if (fileToLoad.startsWith("@")) {
+                int offest = fileToLoad.startsWith("@/") ? 2 : 1;
+                try {
+                    RT.loadResourceScript(fileToLoad.substring(offest));
+                } catch (IOException e) {
+                    System.out.println("Error loading resource script: " + fileToLoad);
+                }
+
+            } else {
+                try {
+                    Compiler.loadFile(fileToLoad);
+                } catch (IOException e) {
+                    System.out.println("Error loading file " + fileToLoad);
+                }
+            }
         }
     }
 
