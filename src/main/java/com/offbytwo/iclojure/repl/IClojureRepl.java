@@ -4,7 +4,8 @@ import clojure.lang.RT;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 import com.offbytwo.iclojure.InputOutputCache;
-import com.offbytwo.iclojure.completion.ClojureCompleter;
+import com.offbytwo.iclojure.completion.DefaultCompleter;
+import com.offbytwo.iclojure.completion.DelegatingCompleter;
 import com.offbytwo.iclojure.exceptions.StopInputException;
 import com.offbytwo.iclojure.handlers.DescribeJavaObjectHandler;
 import com.offbytwo.iclojure.util.ClassFinder;
@@ -56,7 +57,7 @@ public class IClojureRepl {
 
         this.pst = var("clj-stacktrace.repl", "pst");
 
-        reader.addCompleter(new ClojureCompleter());
+        reader.addCompleter(new DelegatingCompleter());
     }
 
     private Object read() throws IOException, StopInputException {
