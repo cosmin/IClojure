@@ -1,5 +1,7 @@
 package com.offbytwo.iclojure.completion;
 
+import com.offbytwo.iclojure.repl.IClojureRepl;
+import com.offbytwo.iclojure.util.ClassFinder;
 import jline.console.completer.Completer;
 
 import java.io.IOException;
@@ -11,21 +13,37 @@ import java.util.regex.Pattern;
 
 public class DelegatingCompleter implements Completer {
     public Map<Pattern, Completer> completers = new LinkedHashMap<Pattern, Completer>();
+    private ClassFinder classFinder;
 
     public static Pattern pattern(String matchThis) {
         return Pattern.compile(matchThis + "(.*)");
     }
 
-    public DelegatingCompleter() throws IOException, ClassNotFoundException {
+    public DelegatingCompleter(ClassFinder classFinder) throws IOException, ClassNotFoundException {
+        this.classFinder = classFinder;
         ClojureCompletionWrapper wrapper = new ClojureCompletionWrapper();
 
         DefaultCompleter DEFAULT_COMPLETER = new DefaultCompleter(wrapper);
         JavaInvocationCompleter JAVA_COMPLETER = new JavaInvocationCompleter(wrapper);
+        Completer FQN_CLASS_FINDER = new FqnClassCompleter(classFinder);
 
+        // java interop
         completers.put(pattern("\\(\\. "), JAVA_COMPLETER);
+
+        // import
+        Completer PACKAGE_NAME_COMPLETER = new PackageNameCompleter(classFinder);
+        completers.put(pattern("\\(import \\["), PACKAGE_NAME_COMPLETER);
+        completers.put(pattern("\\(import '\\("), PACKAGE_NAME_COMPLETER);
+        completers.put(pattern("\\(import '"), FQN_CLASS_FINDER);
+        completers.put(pattern("\\(import "), FQN_CLASS_FINDER);
+
+
+        // shorthands
         completers.put(pattern("\\?\\?"), DEFAULT_COMPLETER);
         completers.put(pattern("\\?"), DEFAULT_COMPLETER);
         completers.put(pattern("%d "), DEFAULT_COMPLETER);
+
+        // regular
         completers.put(pattern("\\("), DEFAULT_COMPLETER);
         completers.put(pattern(""), DEFAULT_COMPLETER);
     }

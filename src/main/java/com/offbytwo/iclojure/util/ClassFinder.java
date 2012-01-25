@@ -13,7 +13,10 @@ import java.util.jar.*;
 
 public class ClassFinder {
 
-    private Map<String, Set<String>> packagesByClassName = new TreeMap<String, Set<String>>();
+    private NavigableSet<String> allClasses = new TreeSet<String>();
+    private NavigableMap<String, NavigableSet<String>> packagesByClassName = new TreeMap<String, NavigableSet<String>>();
+    private NavigableMap<String, NavigableSet<String>> classesByPackageName = new TreeMap<String, NavigableSet<String>>();
+
     private List<String> ignorePackages = Arrays.asList("sun.", "com.sun.", "java.beans");
 
     public ClassFinder() {
@@ -24,6 +27,8 @@ public class ClassFinder {
             if (className.startsWith("_")) {
                 continue;
             }
+
+            allClasses.add(fullClassName);
 
             String packageName = fullClassName.substring(0, lastIndex);
 
@@ -43,10 +48,15 @@ public class ClassFinder {
                 packagesByClassName.put(className, new TreeSet<String>());
             }
             packagesByClassName.get(className).add(packageName);
+
+            if (!classesByPackageName.containsKey(packageName)) {
+                classesByPackageName.put(packageName, new TreeSet<String>());
+            }
+            classesByPackageName.get(packageName).add(className);
         }
     }
 
-    public List<String> findAllClassesInClasspath() {
+    protected List<String> findAllClassesInClasspath() {
         ArrayList<String> classes = new ArrayList<String>();
 
         for (File file : getClasspathLocationsThatExist()) {
@@ -187,6 +197,10 @@ public class ClassFinder {
         return matches;
     }
 
+    public Set<String> findFQClassesStartingWith(String prefix) {
+        return allClasses.subSet(prefix, prefix + "\uffff");
+    }
+
     public Set<String> findClassesInPackageByGlob(String packageName, String className) {
         Set<String> matches = new TreeSet<String>();
 
@@ -301,17 +315,13 @@ public class ClassFinder {
         return classpath == null || classpath.length() == 0;
     }
 
-//    private boolean isSuperClass(Class thisOne, Class superClass) {
-//        return superClass.isAssignableFrom(thisOne) && superClass != thisOne;
-//    }
-//
-//    private Class<?> loadClassFromPackageAndName(String packageName, String classname) {
-//        try {
-//            return Class.forName(packageName + "." + classname);
-//        } catch (ClassNotFoundException cnfe) {
-//            return null;
-//        }
-//    }
+    public NavigableMap<String, NavigableSet<String>> getClassesByPackageName() {
+        return classesByPackageName;
+    }
+
+    public Set<String> findPackagesStartingWith(String prefix) {
+        return classesByPackageName.subMap(prefix, prefix + "\uffff").keySet();
+    }
 
     private static class DirectoriesOnlyFilter implements FileFilter {
         public boolean accept(File f) {

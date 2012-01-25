@@ -35,7 +35,7 @@ Then you can simply launch `iclojure` at any time.
 
 ## Features
 
-- Tab completion, based on http://github.com/ninjudd/clojure-complete, itself based on swank-clojure.
+- Tab completion
 - Shorthand for source and doc
 - Shorthand for introspecting Java objects and classes via reflection
 - Proper Control-C handling, although not very portable
@@ -50,6 +50,7 @@ Then you can simply launch `iclojure` at any time.
 - "(. object method" completion for all the methods of the object (or a form that evaluates to an object)
 - namespaces
 - java classes
+- import statements for both symbols and import lists
 
 ## Input / output caching
 
@@ -72,7 +73,7 @@ In addition to the Clojure convention of caching the last 3 output in `*1`, `*2`
 
 ## Roadmap
 
-- tab completion for import, require and use forms
+- tab completion for require and use forms
 - abort long runing tasks with Ctrl+C
 - better stack traces
 - find class by name (to know what to import)

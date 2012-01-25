@@ -41,7 +41,7 @@ public class IClojureRepl {
     private Var pst;
     private OutputStreamWriter writer;
     private InputOutputCache ioCache = new InputOutputCache(1000);
-    private ClassFinder classFinder;
+    private ClassFinder classFinder = new ClassFinder();
 
 
     public IClojureRepl(final ConsoleReader reader) throws ClassNotFoundException, IOException {
@@ -57,7 +57,7 @@ public class IClojureRepl {
 
         this.pst = var("clj-stacktrace.repl", "pst");
 
-        reader.addCompleter(new DelegatingCompleter());
+        reader.addCompleter(new DelegatingCompleter(classFinder));
     }
 
     private Object read() throws IOException, StopInputException {
@@ -228,11 +228,6 @@ public class IClojureRepl {
                 packageName = components[1];
             } else {
                 className = searchFor;
-            }
-
-
-            if (classFinder == null) {
-                classFinder = new ClassFinder();
             }
 
             Set<String> matches;
