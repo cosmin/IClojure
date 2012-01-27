@@ -1,6 +1,5 @@
 package com.offbytwo.iclojure.signals;
 
-import com.offbytwo.iclojure.Main;
 import com.offbytwo.iclojure.repl.IClojureRepl;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;

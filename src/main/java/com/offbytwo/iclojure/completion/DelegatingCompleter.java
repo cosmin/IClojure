@@ -1,6 +1,5 @@
 package com.offbytwo.iclojure.completion;
 
-import com.offbytwo.iclojure.repl.IClojureRepl;
 import com.offbytwo.iclojure.util.ClassFinder;
 import jline.console.completer.Completer;
 
