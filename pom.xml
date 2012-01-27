@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
     <name>IClojure</name>
     <description>A better Clojure REPL, inspired by IPython</description>
-    <url>https://github.com/cosmin/IClojure</url>
+    <url>http://www.iclojure.com/</url>
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
@@ -72,7 +72,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <!--<version>2.1.2</version>-->
+                <version>2.1.2</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
