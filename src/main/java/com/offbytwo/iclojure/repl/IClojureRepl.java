@@ -122,6 +122,7 @@ public class IClojureRepl {
                 inputNumber += 1;
                 input = read();
                 if (input == null) {
+                    cacheInputOutput(null, null);
                     continue;
                 }
                 output = eval(input);
