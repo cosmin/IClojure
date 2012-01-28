@@ -31,7 +31,6 @@ public class IClojureRepl {
     private Var ns = var("clojure.core", "*ns*");
     private Var eval = var("clojure.core", "eval");
 
-    private StringBuffer inputSoFar = new StringBuffer();
     private DescribeJavaObjectHandler describeHandler;
     private Var output1 = var("clojure.core", "*1");
     private Var output2 = var("clojure.core", "*2");
@@ -41,6 +40,8 @@ public class IClojureRepl {
     private OutputStreamWriter writer;
     private InputOutputCache ioCache = new InputOutputCache(1000);
     private ClassFinder classFinder = new ClassFinder();
+    private StringBuilder inputSoFar;
+    private String lastPrompt;
 
 
     public IClojureRepl(final ConsoleReader reader) throws ClassNotFoundException, IOException {
@@ -56,10 +57,11 @@ public class IClojureRepl {
         this.pst = var("clj-stacktrace.repl", "pst");
 
         reader.addCompleter(new DelegatingCompleter(classFinder));
+        inputSoFar = new StringBuilder();
     }
 
     private Object read() throws IOException, StopInputException {
-        String line = readLine();
+        String line = readLine(true);
 
         if (line == null || line.equals("exit")) {
             throw new StopInputException();
@@ -70,14 +72,30 @@ public class IClojureRepl {
         } else if (line.trim().equals("")) {
             return null;
         } else {
+            return readPotentiallyMultilineForm(line);
+        }
+    }
+
+    private Object readPotentiallyMultilineForm(String line) {
+        inputSoFar.append(line).append(" ");
+        for (; ; ) {
             try {
-                Object read = readString(inputSoFar.toString() + line);
-                inputSoFar = new StringBuffer();
-                return read;
+                if (inputSoFar.toString().trim().length() > 0) {
+                    Object input = readString(inputSoFar.toString());
+                    inputSoFar.setLength(0);
+                    return input;
+                } else {
+                    return null;
+                }
             } catch (RuntimeException re) {
                 if (re.getMessage().startsWith("EOF while reading")) {
-                    inputSoFar.append(line + " ");
-                    return null;
+                    try {
+                        String newLine = readLine(false);
+                        inputSoFar.append(newLine).append(" ");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
                 } else {
                     re.printStackTrace();
                     return null;
@@ -164,26 +182,39 @@ public class IClojureRepl {
     }
 
     public void abortCurrentRead() throws IOException {
+        this.reader.println();
+        this.reader.println("Keyboard Interrupt");
+        this.reader.println();
+
+        this.inputSoFar.setLength(0);
+
         this.reader.setCursorPosition(0);
         this.reader.killLine();
 
-        if (this.inputSoFar.length() > 0) {
-            this.inputSoFar = new StringBuffer();
-            this.reader.println();
-            this.reader.setPrompt(getPrompt());
-            this.reader.redrawLine();
-            this.reader.flush();
-        }
+        this.reader.setPrompt(lastPrompt);
+
+        this.reader.redrawLine();
+        this.reader.flush();
+
     }
 
     private Object handleHelp(String line) throws IOException {
+        String expanded;
+
         if (line.equals("?")) {
             help();
             return null;
         } else if (line.startsWith("??")) {
-            return readString("(clojure.repl/source " + line.replace("??", "") + ")");
+            expanded = "(clojure.repl/source " + line.replace("??", "") + ")";
         } else {
-            return readString("(clojure.repl/doc " + line.replace("?", "") + ")");
+            expanded = "(clojure.repl/doc " + line.replace("?", "") + ")";
+        }
+
+        try {
+            return readString(expanded);
+        } catch (RuntimeException re) {
+            reader.println("Error reading: " + expanded);
+            return null;
         }
     }
 
@@ -246,12 +277,12 @@ public class IClojureRepl {
         return null;
     }
 
-    private String readLine() throws IOException {
+    private String readLine(boolean firstLine) throws IOException {
         String line = null;
 
         int promptLength = new AnsiString(getPrompt()).length();
 
-        StringBuffer morePrompt = new StringBuffer();
+        StringBuilder morePrompt = new StringBuilder();
         for (int i = 0; i < promptLength - 5; i++) {
             morePrompt.append(" ");
         }
@@ -260,10 +291,10 @@ public class IClojureRepl {
 
 
         while (line == null) {
-            if (inputSoFar.length() > 0) {
-                line = reader.readLine(morePrompt.toString());
-            } else {
+            if (firstLine) {
                 line = reader.readLine(getPrompt());
+            } else {
+                line = reader.readLine(morePrompt.toString());
             }
 
             if (line == null) {
@@ -283,16 +314,17 @@ public class IClojureRepl {
     }
 
     private String getPrompt() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(color(BLUE, format("%s[", ns.deref())));
         sb.append(colorBright(BLUE, valueOf(inputNumber)));
         sb.append(color(BLUE, "]: "));
         sb.append(revertToDefaultColor());
-        return sb.toString();
+        lastPrompt = sb.toString();
+        return lastPrompt;
     }
 
     private String getOutputPrompt() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(color(RED, format("%s[", ns.deref())));
         sb.append(colorBright(RED, valueOf(inputNumber)));
         sb.append(color(RED, "]= "));

@@ -11,7 +11,6 @@ public class ControlCSignalHandler implements SignalHandler {
     private IClojureRepl repl;
 
     public ControlCSignalHandler(IClojureRepl repl) {
-
         this.repl = repl;
     }
 
