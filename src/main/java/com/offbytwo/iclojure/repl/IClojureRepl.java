@@ -28,7 +28,6 @@ import static org.fusesource.jansi.Ansi.Color.RED;
 public class IClojureRepl {
     private ConsoleReader reader;
     private int inputNumber;
-    private String namespace;
     private Var ns = var("clojure.core", "*ns*");
     private Var eval = var("clojure.core", "eval");
 
@@ -47,7 +46,6 @@ public class IClojureRepl {
     public IClojureRepl(final ConsoleReader reader) throws ClassNotFoundException, IOException {
         this.reader = reader;
         this.inputNumber = 0;
-        this.namespace = "user";
 
         this.writer = new ConsoleOutputStreamWriter(reader);
         this.describeHandler = new DescribeJavaObjectHandler(reader);
@@ -286,7 +284,7 @@ public class IClojureRepl {
 
     private String getPrompt() {
         StringBuffer sb = new StringBuffer();
-        sb.append(color(BLUE, format("%s[", namespace)));
+        sb.append(color(BLUE, format("%s[", ns.deref())));
         sb.append(colorBright(BLUE, valueOf(inputNumber)));
         sb.append(color(BLUE, "]: "));
         sb.append(revertToDefaultColor());
@@ -295,7 +293,7 @@ public class IClojureRepl {
 
     private String getOutputPrompt() {
         StringBuffer sb = new StringBuffer();
-        sb.append(color(RED, format("%s[", namespace)));
+        sb.append(color(RED, format("%s[", ns.deref())));
         sb.append(colorBright(RED, valueOf(inputNumber)));
         sb.append(color(RED, "]= "));
         sb.append(revertToDefaultColor());
