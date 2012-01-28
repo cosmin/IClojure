@@ -183,9 +183,9 @@ public class IClojureRepl {
             help();
             return null;
         } else if (line.startsWith("??")) {
-            return readString("(source " + line.replace("??", "") + ")");
+            return readString("(clojure.repl/source " + line.replace("??", "") + ")");
         } else {
-            return readString("(doc " + line.replace("?", "") + ")");
+            return readString("(clojure.repl/doc " + line.replace("?", "") + ")");
         }
     }
 
