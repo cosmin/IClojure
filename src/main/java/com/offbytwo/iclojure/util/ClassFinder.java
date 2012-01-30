@@ -22,15 +22,23 @@ public class ClassFinder {
     public ClassFinder() {
         for (String fullClassName : findAllClassesInClasspath()) {
             int lastIndex = fullClassName.lastIndexOf(".");
-            String className = fullClassName.substring(lastIndex + 1);
+
+            String className;
+            String packageName;
+
+            if (lastIndex > 0) {
+                className = fullClassName.substring(lastIndex + 1);
+                packageName = fullClassName.substring(0, lastIndex);
+            } else {
+                className = fullClassName;
+                packageName = "";
+            }
 
             if (className.startsWith("_")) {
                 continue;
             }
 
             allClasses.add(fullClassName);
-
-            String packageName = fullClassName.substring(0, lastIndex);
 
             boolean skip = false;
 
@@ -321,23 +329,5 @@ public class ClassFinder {
 
     public Set<String> findPackagesStartingWith(String prefix) {
         return classesByPackageName.subMap(prefix, prefix + "\uffff").keySet();
-    }
-
-    private static class DirectoriesOnlyFilter implements FileFilter {
-        public boolean accept(File f) {
-            return f.exists() && f.isDirectory();
-        }
-    }
-
-    private static class URLComparator implements Comparator<URL> {
-        public int compare(URL u1, URL u2) {
-            return String.valueOf(u1).compareTo(String.valueOf(u2));
-        }
-    }
-
-    private static class ClassComparator implements Comparator<Class<?>> {
-        public int compare(Class<?> c1, Class<?> c2) {
-            return String.valueOf(c1).compareTo(String.valueOf(c2));
-        }
     }
 }

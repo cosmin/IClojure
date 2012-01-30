@@ -1,8 +1,7 @@
 package com.offbytwo.iclojure.repl;
 
-import clojure.lang.RT;
-import clojure.lang.Symbol;
-import clojure.lang.Var;
+import clojure.lang.*;
+import clojure.lang.Compiler;
 import com.offbytwo.iclojure.InputOutputCache;
 import com.offbytwo.iclojure.completion.DefaultCompleter;
 import com.offbytwo.iclojure.completion.DelegatingCompleter;
