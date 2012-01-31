@@ -14,6 +14,7 @@ import org.fusesource.jansi.AnsiString;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -42,9 +43,13 @@ public class IClojureRepl {
     private ClassFinder classFinder = new ClassFinder();
     private StringBuilder inputSoFar;
     private String lastPrompt;
+    private boolean clojure1_2;
 
 
     public IClojureRepl(final ConsoleReader reader) throws ClassNotFoundException, IOException {
+        String clojureVersion = (String) var("clojure.core", "clojure-version").invoke();
+        this.clojure1_2 = clojureVersion.startsWith("1.2");
+        
         this.reader = reader;
         this.inputNumber = 0;
 
@@ -87,8 +92,8 @@ public class IClojureRepl {
                 } else {
                     return null;
                 }
-            } catch (RuntimeException re) {
-                if (re.getMessage().startsWith("EOF while reading")) {
+            } catch (Throwable t) {
+                if (t.getMessage().contains("EOF while reading")) {
                     try {
                         String newLine = readLine(false);
                         inputSoFar.append(newLine).append(" ");
@@ -97,7 +102,7 @@ public class IClojureRepl {
                         return null;
                     }
                 } else {
-                    re.printStackTrace();
+                    t.printStackTrace();
                     return null;
                 }
             }
@@ -112,9 +117,9 @@ public class IClojureRepl {
             reader.getOutput().flush();
 
             return ret;
-        } catch (RuntimeException re) {
-            lastError.set(re);
-            printStackTrace(re);
+        } catch (Throwable t) {
+            lastError.set(t);
+            printStackTrace(t);
             return null;
         }
     }
@@ -161,13 +166,20 @@ public class IClojureRepl {
         Namespace userNs = Namespace.findOrCreate(Symbol.create(null, "user"));
 
         RT.load("clojure/repl");
-        List<String> replFns = Arrays.asList("source", "apropos", "dir", "doc", "find-doc");
+        List<String> replFns = new ArrayList<String> (Arrays.asList("source", "apropos", "dir"));
+        if (!clojure1_2) {
+            replFns.add("doc");
+            replFns.add("find-doc");
+        }
+        
         for (String name : replFns) {
             userNs.refer(Symbol.create(null, name), var("clojure.repl", name));
         }
 
-        RT.load("clojure/java/javadoc");
-        userNs.refer(Symbol.create(null, "javadoc"), var("clojure.java.javadoc", "javadoc"));
+        if (!clojure1_2) {
+            RT.load("clojure/java/javadoc");
+            userNs.refer(Symbol.create(null, "javadoc"), var("clojure.java.javadoc", "javadoc"));
+        }
         
         RT.load("clojure/pprint");
         userNs.refer(Symbol.create(null, "pprint"), var("clojure.pprint", "pprint"));
@@ -219,12 +231,16 @@ public class IClojureRepl {
         } else if (line.startsWith("??")) {
             expanded = "(clojure.repl/source " + line.replace("??", "") + ")";
         } else {
-            expanded = "(clojure.repl/doc " + line.replace("?", "") + ")";
+            if (clojure1_2) {
+                expanded = "(clojure.core/doc " + line.replace("?", "") + ")";
+            } else {
+                expanded = "(clojure.repl/doc " + line.replace("?", "") + ")";
+            }
         }
 
         try {
             return readString(expanded);
-        } catch (RuntimeException re) {
+        } catch (Throwable t) {
             reader.println("Error reading: " + expanded);
             return null;
         }
@@ -245,7 +261,7 @@ public class IClojureRepl {
             Object input;
             try {
                 input = readString(line.replace("%d", "").trim());
-            } catch (RuntimeException re) {
+            } catch (Throwable t) {
                 reader.println("Error: unable to read form after %d");
                 return null;
             }
@@ -253,8 +269,8 @@ public class IClojureRepl {
             Object output;
             try {
                 output = Compiler.eval(input);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Throwable t) {
+                t.printStackTrace();
                 reader.println("Error: unable to evaluate form after %d");
                 return null;
             }
@@ -350,17 +366,17 @@ public class IClojureRepl {
         output1.set(ret);
     }
 
-    private void printStackTrace(RuntimeException re) throws IOException {
+    private void printStackTrace(Throwable t) throws IOException {
         reader.println(color(RED, "---------------------------------------------------------------------------"));
         reader.print(revertToDefaultColor());
         reader.flush();
-        pst.invoke(re);
+        pst.invoke(t);
         reader.println();
         StringBuffer sb = new StringBuffer();
-        sb.append(color(RED, re.getClass().getSimpleName()));
+        sb.append(color(RED, t.getClass().getSimpleName()));
         sb.append(revertToDefaultColor());
         sb.append(": ");
-        sb.append(re.getLocalizedMessage());
+        sb.append(t.getLocalizedMessage());
         reader.println(sb.toString());
         reader.flush();
     }
