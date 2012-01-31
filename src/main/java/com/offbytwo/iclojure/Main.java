@@ -7,10 +7,10 @@ import com.offbytwo.iclojure.signals.ControlCSignalHandler;
 import com.offbytwo.iclojure.signals.RestoreTerminalHook;
 import jline.console.ConsoleReader;
 import jline.console.history.FileHistory;
+import org.apache.log4j.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.*;
 
 import static clojure.lang.RT.var;
 
@@ -77,20 +77,15 @@ public class Main {
         File logFile = new File(homeFolder, ".iclojure.log");
 
         Logger logger = Logger.getLogger("com.offbytwo.iclojure");
-        logger.setUseParentHandlers(false);
         logger.setLevel(LOG_LEVEL);
 
-        Handler handler;
         try {
-            handler = new FileHandler(logFile.getAbsolutePath());
-
+            logger.addAppender(new FileAppender(new SimpleLayout(), logFile.getAbsolutePath()));
         } catch (IOException e) {
             System.err.println(String.format("Unable to open log file %s. Logging to console", logFile));
             e.printStackTrace();
-            handler = new ConsoleHandler();
+            logger.addAppender(new ConsoleAppender());
         }
-        handler.setFormatter(new SimpleFormatter());
-        logger.addHandler(handler);
 
         logger.info("Started iClojure REPL");
     }
