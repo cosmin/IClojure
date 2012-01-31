@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Logger;
 
 
 public class ClassFinder {
@@ -18,8 +19,10 @@ public class ClassFinder {
     private NavigableMap<String, NavigableSet<String>> packagesByClassName = new TreeMap<String, NavigableSet<String>>();
     private NavigableMap<String, NavigableSet<String>> classesByPackageName = new TreeMap<String, NavigableSet<String>>();
 
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     public ClassFinder() {
+        final long startTime = System.nanoTime();
 
         for (String fullClassName : findAllClassesInClasspath()) {
             int lastIndex = fullClassName.lastIndexOf(".");
@@ -63,6 +66,11 @@ public class ClassFinder {
             }
             classesByPackageName.get(packageName).add(className);
         }
+
+        final long endTime = System.nanoTime();
+        final long duration = endTime - startTime;
+
+        logger.info(String.format("ClassFinder took %f seconds", duration / 1000000000.0));
     }
 
     protected List<String> findAllClassesInClasspath() {
@@ -80,6 +88,7 @@ public class ClassFinder {
     }
 
     private List<String> getClassesInJar(File file) {
+        logger.fine("Getting classes in jar file " + file);
         List<String> classes = new ArrayList<String>();
 
         try {
@@ -140,6 +149,7 @@ public class ClassFinder {
     }
 
     public List<String> getClassesInDirectory(File startingWithDirectory) {
+        logger.fine("Getting classes in directory " + startingWithDirectory.getAbsolutePath());
         List<String> classes = new ArrayList<String>();
 
         Set<String> seen = new HashSet<String>();
@@ -157,6 +167,7 @@ public class ClassFinder {
                     String fullName = file.getAbsolutePath().replace(startingWithDirectory.getAbsolutePath(), "");
                     classes.add(fullName);
                 } else if (file.isDirectory() && !seen.contains(file.getAbsolutePath())) {
+                    logger.finer("Going to take a look inside " + file.getAbsolutePath());
                     seen.add(file.getAbsolutePath());
                     directoriesToScan.add(file);
                 }

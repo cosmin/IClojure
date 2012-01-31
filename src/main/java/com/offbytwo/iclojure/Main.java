@@ -10,11 +10,14 @@ import jline.console.history.FileHistory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.*;
 
 import static clojure.lang.RT.var;
 
 
 public class Main {
+
+    public static Level LOG_LEVEL = Level.INFO;
 
     public static void usage() {
         System.out.println("Usage: java -cp iclojure.jar [com.offbytwo.iclojure.Main] [-i file]\n" +
@@ -44,9 +47,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-
-
-
+        configureLogging();
         try {
             final ConsoleReader reader = new ConsoleReader();
 
@@ -69,6 +70,29 @@ public class Main {
         } finally {
             var("clojure.core", "shutdown-agents").invoke();
         }
+    }
+
+    private static void configureLogging() {
+        String homeFolder = System.getProperty("user.home");
+        File logFile = new File(homeFolder, ".iclojure.log");
+
+        Logger logger = Logger.getLogger("com.offbytwo.iclojure");
+        logger.setUseParentHandlers(false);
+        logger.setLevel(LOG_LEVEL);
+
+        Handler handler;
+        try {
+            handler = new FileHandler(logFile.getAbsolutePath());
+
+        } catch (IOException e) {
+            System.err.println(String.format("Unable to open log file %s. Logging to console", logFile));
+            e.printStackTrace();
+            handler = new ConsoleHandler();
+        }
+        handler.setFormatter(new SimpleFormatter());
+        logger.addHandler(handler);
+
+        logger.info("Started iClojure REPL");
     }
 
     private static void loadRequestedScripts(String[] args) {
