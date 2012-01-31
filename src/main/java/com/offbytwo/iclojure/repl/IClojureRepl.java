@@ -14,6 +14,8 @@ import org.fusesource.jansi.AnsiString;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import static clojure.lang.RT.*;
@@ -28,7 +30,6 @@ public class IClojureRepl {
     private ConsoleReader reader;
     private int inputNumber;
     private Var ns = var("clojure.core", "*ns*");
-    private Var eval = var("clojure.core", "eval");
 
     private DescribeJavaObjectHandler describeHandler;
     private Var output1 = var("clojure.core", "*1");
@@ -105,7 +106,7 @@ public class IClojureRepl {
 
     private Object eval(Object line) throws StopInputException, IOException {
         try {
-            Object ret = eval.invoke(line);
+            Object ret = Compiler.eval(line);
 
             writer.flush();
             reader.getOutput().flush();
@@ -156,13 +157,25 @@ public class IClojureRepl {
         ioCache.add(input, output);
     }
 
-    private void createUserNamespace() {
-        var("clojure.core", "in-ns").invoke(Symbol.create(null, "user"));
-        Var use = var("clojure.core", "use");
-        use.invoke(readString("[clojure.repl :only (source apropos dir doc find-doc)]"));
-        use.invoke(readString("[clojure.java.javadoc :only (javadoc)]"));
-        use.invoke(readString("[clojure.pprint :only (pprint)]"));
-        use.invoke(readString("[clj-stacktrace.repl :only (pst)]"));
+    private void createUserNamespace() throws ClassNotFoundException, IOException {
+        Namespace userNs = Namespace.findOrCreate(Symbol.create(null, "user"));
+
+        RT.load("clojure/repl");
+        List<String> replFns = Arrays.asList("source", "apropos", "dir", "doc", "find-doc");
+        for (String name : replFns) {
+            userNs.refer(Symbol.create(null, name), var("clojure.repl", name));
+        }
+
+        RT.load("clojure/java/javadoc");
+        userNs.refer(Symbol.create(null, "javadoc"), var("clojure.java.javadoc", "javadoc"));
+        
+        RT.load("clojure/pprint");
+        userNs.refer(Symbol.create(null, "pprint"), var("clojure.pprint", "pprint"));
+
+        RT.load("clj_stacktrace/repl");
+        userNs.refer(Symbol.create(null, "pst"), var("clj-stacktrace.repl", "pst"));
+
+        this.ns.set(userNs);
     }
 
     private void createNecessaryThreadBindings() {
@@ -239,7 +252,7 @@ public class IClojureRepl {
 
             Object output;
             try {
-                output = eval.invoke(input);
+                output = Compiler.eval(input);
             } catch (Exception e) {
                 e.printStackTrace();
                 reader.println("Error: unable to evaluate form after %d");
