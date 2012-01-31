@@ -4,22 +4,23 @@ package com.offbytwo.iclojure.util;
  * ClassFinder.java
  */
 
-import java.io.*;
-import java.net.URL;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.jar.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 
 public class ClassFinder {
+    public static final List<String> PACKAGES_TO_IGNORE = Arrays.asList("sun.", "com.sun.", "java.beans");
 
     private NavigableSet<String> allClasses = new TreeSet<String>();
     private NavigableMap<String, NavigableSet<String>> packagesByClassName = new TreeMap<String, NavigableSet<String>>();
     private NavigableMap<String, NavigableSet<String>> classesByPackageName = new TreeMap<String, NavigableSet<String>>();
 
-    private List<String> ignorePackages = Arrays.asList("sun.", "com.sun.", "java.beans");
 
     public ClassFinder() {
+
         for (String fullClassName : findAllClassesInClasspath()) {
             int lastIndex = fullClassName.lastIndexOf(".");
 
@@ -42,7 +43,7 @@ public class ClassFinder {
 
             boolean skip = false;
 
-            for (String ignore : ignorePackages) {
+            for (String ignore : PACKAGES_TO_IGNORE) {
                 if (packageName.startsWith(ignore)) {
                     skip = true;
                 }
@@ -141,19 +142,23 @@ public class ClassFinder {
     public List<String> getClassesInDirectory(File startingWithDirectory) {
         List<String> classes = new ArrayList<String>();
 
-        List<File> directoriesToScan = new ArrayList<File>();
+        Set<String> seen = new HashSet<String>();
+        seen.add(startingWithDirectory.getAbsolutePath());
+
+        Queue<File> directoriesToScan = new ArrayDeque<File>();
         directoriesToScan.add(startingWithDirectory);
 
-        // do not use foreach as we modify the list in place
-        for (int i = 0; i < directoriesToScan.size(); i++) {
-            File directory = directoriesToScan.get(i);
+        File directory;
 
-            for (File file : directory.listFiles()) {
+        while ((directory = directoriesToScan.poll()) != null) {
+            File[] files = directory.listFiles();
+            for (File file : files) {
                 if (file.isFile() && file.getName().endsWith(".class")) {
                     String fullName = file.getAbsolutePath().replace(startingWithDirectory.getAbsolutePath(), "");
                     classes.add(fullName);
-                } else if (file.isDirectory()) {
-                    directoriesToScan.add(directory);
+                } else if (file.isDirectory() && !seen.contains(file.getAbsolutePath())) {
+                    seen.add(file.getAbsolutePath());
+                    directoriesToScan.add(file);
                 }
             }
         }
