@@ -2,10 +2,6 @@
 
 An Interactive Clojure repl, inspired by IPython.
 
-## License
-
-Eclipse Public License (EPL), same as Clojure.
-
 ## Getting started
 
 ```
@@ -25,13 +21,23 @@ Then you can simply launch `iclojure` at any time.
 
 ## Development
 
-    git checkout https://github.com/cosmin/IClojure
-    cd IClojure
-    bin/run.sh
+IClojure ships with the latest alpha of Clojure 1.4, although it supports Clojure >= 1.2
+
+```
+git checkout https://github.com/cosmin/IClojure
+cd IClojure
+bin/run.sh
+```
 
 ## Package
 
-    mvn clean package
+You can package IClojure for distribution, including sources and a standalone jar with
+
+```
+mvn clean package
+```
+
+The `iclojure-*-standalone.jar` is a self-contained Jar that includes all the necessary dependencies.
 
 ## Features
 
@@ -77,3 +83,7 @@ In addition to the Clojure convention of caching the last 3 output in `*1`, `*2`
 - abort long runing tasks with Ctrl+C
 - better stack traces
 - find class by name (to know what to import)
+
+## License
+
+Eclipse Public License (EPL), same as Clojure.
