@@ -17,12 +17,24 @@ public class InputOutputCache {
     }
 
 
+    private int convertToInteger(Object arg1) {
+        int value;
+        if (arg1 instanceof Long) {
+            value = ((Long) arg1).intValue();
+        } else if (arg1 instanceof Integer) {
+            value = (Integer) arg1;
+        } else {
+            throw new IllegalArgumentException("Argument must be Integer or Long. Received: " + arg1.getClass());
+        }
+        return value;
+    }
+
     public AFn getInputLookupFn() {
         final InputOutputCache cache = this;
         return new AFn() {
             @Override
             public Object invoke(Object arg1) {
-                return cache.getInput(((Long) arg1).intValue());
+                return cache.getInput(convertToInteger(arg1));
             }
         };
     }
@@ -32,7 +44,7 @@ public class InputOutputCache {
         return new AFn() {
             @Override
             public Object invoke(Object arg1) {
-                return cache.getOutput(((Long) arg1).intValue());
+                return cache.getOutput(convertToInteger(arg1));
             }
         };
     }
