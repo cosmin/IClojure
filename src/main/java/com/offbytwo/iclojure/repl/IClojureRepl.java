@@ -49,7 +49,7 @@ public class IClojureRepl {
     public IClojureRepl(final ConsoleReader reader) throws ClassNotFoundException, IOException {
         String clojureVersion = (String) var("clojure.core", "clojure-version").invoke();
         this.clojure1_2 = clojureVersion.startsWith("1.2");
-        
+
         this.reader = reader;
         this.inputNumber = 0;
 
@@ -83,29 +83,33 @@ public class IClojureRepl {
 
     private Object readPotentiallyMultilineForm(String line) {
         inputSoFar.append(line).append(" ");
-        for (; ; ) {
-            try {
-                if (inputSoFar.toString().trim().length() > 0) {
-                    Object input = readString(inputSoFar.toString());
-                    inputSoFar.setLength(0);
-                    return input;
-                } else {
-                    return null;
-                }
-            } catch (Throwable t) {
-                if (t.getMessage().contains("EOF while reading")) {
-                    try {
-                        String newLine = readLine(false);
-                        inputSoFar.append(newLine).append(" ");
-                    } catch (IOException e) {
-                        e.printStackTrace();
+
+        try {
+            for (; ; ) {
+                try {
+                    if (inputSoFar.toString().trim().length() > 0) {
+                        Object input = readString(inputSoFar.toString());
+                        return input;
+                    } else {
                         return null;
                     }
-                } else {
-                    t.printStackTrace();
-                    return null;
+                } catch (Throwable t) {
+                    if (t.getMessage().contains("EOF while reading")) {
+                        try {
+                            String newLine = readLine(false);
+                            inputSoFar.append(newLine).append(" ");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    } else {
+                        printStackTrace(t);
+                        return null;
+                    }
                 }
             }
+        } finally {
+            inputSoFar.setLength(0);
         }
     }
 
@@ -166,12 +170,12 @@ public class IClojureRepl {
         Namespace userNs = Namespace.findOrCreate(Symbol.create(null, "user"));
 
         RT.load("clojure/repl");
-        List<String> replFns = new ArrayList<String> (Arrays.asList("source", "apropos", "dir"));
+        List<String> replFns = new ArrayList<String>(Arrays.asList("source", "apropos", "dir"));
         if (!clojure1_2) {
             replFns.add("doc");
             replFns.add("find-doc");
         }
-        
+
         for (String name : replFns) {
             userNs.refer(Symbol.create(null, name), var("clojure.repl", name));
         }
@@ -180,7 +184,7 @@ public class IClojureRepl {
             RT.load("clojure/java/javadoc");
             userNs.refer(Symbol.create(null, "javadoc"), var("clojure.java.javadoc", "javadoc"));
         }
-        
+
         RT.load("clojure/pprint");
         userNs.refer(Symbol.create(null, "pprint"), var("clojure.pprint", "pprint"));
 
@@ -366,19 +370,23 @@ public class IClojureRepl {
         output1.set(ret);
     }
 
-    private void printStackTrace(Throwable t) throws IOException {
-        reader.println(color(RED, "---------------------------------------------------------------------------"));
-        reader.print(revertToDefaultColor());
-        reader.flush();
-        pst.invoke(t);
-        reader.println();
-        StringBuffer sb = new StringBuffer();
-        sb.append(color(RED, t.getClass().getSimpleName()));
-        sb.append(revertToDefaultColor());
-        sb.append(": ");
-        sb.append(t.getLocalizedMessage());
-        reader.println(sb.toString());
-        reader.flush();
+    private void printStackTrace(Throwable t) {
+        try {
+            reader.println(color(RED, "---------------------------------------------------------------------------"));
+            reader.print(revertToDefaultColor());
+            reader.flush();
+            pst.invoke(t);
+            reader.println();
+            StringBuffer sb = new StringBuffer();
+            sb.append(color(RED, t.getClass().getSimpleName()));
+            sb.append(revertToDefaultColor());
+            sb.append(": ");
+            sb.append(t.getLocalizedMessage());
+            reader.println(sb.toString());
+            reader.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void help() throws IOException {
