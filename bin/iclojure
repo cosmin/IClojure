@@ -1,29 +1,44 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-ICLOJURE_HOME=~/.iclojure/
-ICLOJURE_JAR=${ICLOJURE_HOME}/iclojure.jar
-ICLOJURE_DOWNLOAD_URL="http://clk.tc/iclojure-latest.jar"
-
-if ! test -d $ICLOJURE_HOME; then
-    mkdir -p $ICLOJURE_HOME
-fi
-
-if ! test -f $ICLOJURE_JAR; then
-    echo "Downloading latest IClojure jar from $ICLOJURE_DOWNLOAD_URL"
-    curl -L $ICLOJURE_DOWNLOAD_URL > $ICLOJURE_JAR
-fi
-
-if [ -n "$JAVA_HOME" ]; then
-    JAVA="$JAVA_HOME/bin/java"
+if test -f project.clj && which -s lein; then
+    # looks like a Leiningen project
+    if test -f ~/.lein/plugins/lein-iclojure-*.jar; then
+        # lein-iclojure is installed
+        lein trampoline irepl
+    else
+        echo "It looks like you are trying to use IClojure with a leiningen project."
+        read -p "Do you want to install the latest lein-iclojure plugin? ([y]/n): " install
+        if [[ $install == "y" || $install == "Y" || $install == "" ]]; then
+            lein plugin install lein-iclojure "1.0.0-SNAPSHOT"
+            lein trampoline irepl
+        fi
+    fi
 else
-    JAVA=$(which java)
-fi
+    ICLOJURE_HOME=~/.iclojure/
+    ICLOJURE_JAR=${ICLOJURE_HOME}/iclojure.jar
+    ICLOJURE_DOWNLOAD_URL="http://clk.tc/iclojure-latest.jar"
 
-if [ -z "$JAVA" ]; then
-    echo "Cannot locate java. Either set JAVA_HOME or add java to PATH"
-    exit 1
-elif ! test -x $JAVA; then
-    echo "Cannot locate java. Either set JAVA_HOME or add java to PATH"
-fi
+    if ! test -d $ICLOJURE_HOME; then
+        mkdir -p $ICLOJURE_HOME
+    fi
 
-$JAVA -client -jar $ICLOJURE_JAR
+    if ! test -f $ICLOJURE_JAR; then
+        echo "Downloading latest IClojure jar from $ICLOJURE_DOWNLOAD_URL"
+        curl -L $ICLOJURE_DOWNLOAD_URL > $ICLOJURE_JAR
+    fi
+
+    if [ -n "$JAVA_HOME" ]; then
+        JAVA="$JAVA_HOME/bin/java"
+    else
+        JAVA=$(which java)
+    fi
+
+    if [ -z "$JAVA" ]; then
+        echo "Cannot locate java. Either set JAVA_HOME or add java to PATH"
+        exit 1
+    elif ! test -x $JAVA; then
+        echo "Cannot locate java. Either set JAVA_HOME or add java to PATH"
+    fi
+
+    $JAVA -client -jar $ICLOJURE_JAR
+fi
