@@ -116,4 +116,6 @@ In addition to the Clojure convention of caching the last 3 output in `*1`, `*2`
 
 ## License
 
-Eclipse Public License (EPL), same as Clojure.
+Copyright (C) 2012 Cosmin Stejerean
+
+Distributed under the Eclipse Public License, the same as Clojure.
