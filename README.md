@@ -112,8 +112,7 @@ In addition to the Clojure convention of caching the last 3 output in `*1`, `*2`
 
 - tab completion for require and use forms
 - abort long runing tasks with Ctrl+C
-- better stack traces
-- find class by name (to know what to import)
+- launch editor from within IClojure
 
 ## License
 
