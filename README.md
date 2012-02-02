@@ -4,6 +4,10 @@ An Interactive Clojure repl, inspired by IPython.
 
 ## Getting started
 
+### Standalone
+
+The simplest way to start with IClojure is to download the latest standalone IClojure jar
+
 ```
 curl -O -L http://clk.tc/iclojure-latest.jar
 java -jar iclojure-latest.jar
@@ -18,6 +22,33 @@ sudo mv iclojure /usr/local/bin
 ```
 
 Then you can simply launch `iclojure` at any time.
+
+### Leiningen
+
+If you are already using Leiningen the simplest way to get started with IClojure is to use the `lein-iclojure` plugin.
+
+```
+lein plugin install lein-iclojure "1.0.0-SNAPSHOT"
+lein irepl
+```
+
+### Maven
+
+If you are already using the latest `clojure-maven-plugin` snapshot you can simply add IClojure to your dependencies
+
+```
+<dependency>
+  <groupId>org.offbytwo.iclojure</groupId>
+  <artifactId>iclojure</groupId>
+  <version>1.0.2-SNAPSHOT</version>
+</dependency>
+```
+
+and then IClojure will replace the usual repl
+
+```
+mvn clojure:repl
+```
 
 ## Development
 
