@@ -130,7 +130,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.sf.jline</groupId>
+            <groupId>jline</groupId>
             <artifactId>jline</artifactId>
             <version>2.6-SNAPSHOT</version>
         </dependency>
