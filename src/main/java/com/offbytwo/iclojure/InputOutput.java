@@ -28,7 +28,7 @@ public class InputOutput {
         }
 
         public static String revertToDefaultColor() {
-            return Ansi.ansi().fg(Ansi.Color.WHITE).toString();
+            return Ansi.ansi().fg(Ansi.Color.DEFAULT).toString();
         }
 
         private static Ansi getColorAnsiSequence(Ansi.Color color, boolean bright) {
