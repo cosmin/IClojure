@@ -1,13 +1,12 @@
 package com.offbytwo.iclojure.repl;
 
-import clojure.lang.*;
 import clojure.lang.Compiler;
+import clojure.lang.*;
+import com.offbytwo.class_finder.ClassFinder;
 import com.offbytwo.iclojure.InputOutputCache;
-import com.offbytwo.iclojure.completion.DefaultCompleter;
 import com.offbytwo.iclojure.completion.DelegatingCompleter;
 import com.offbytwo.iclojure.exceptions.StopInputException;
 import com.offbytwo.iclojure.handlers.DescribeJavaObjectHandler;
-import com.offbytwo.iclojure.util.ClassFinder;
 import com.offbytwo.iclojure.util.ConsoleOutputStreamWriter;
 import jline.console.ConsoleReader;
 import org.fusesource.jansi.AnsiString;
@@ -295,9 +294,9 @@ public class IClojureRepl {
             Set<String> matches;
 
             if (searchFor.contains("*") || searchFor.contains("?")) {
-                matches = classFinder.findClassesInPackageByName(packageName, className);
-            } else {
                 matches = classFinder.findClassesInPackageByGlob(packageName, className);
+            } else {
+                matches = classFinder.findClassesInPackageByName(packageName, className);
             }
 
             reader.printColumns(matches);

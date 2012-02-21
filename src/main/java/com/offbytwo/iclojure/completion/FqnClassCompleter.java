@@ -1,6 +1,6 @@
 package com.offbytwo.iclojure.completion;
 
-import com.offbytwo.iclojure.util.ClassFinder;
+import com.offbytwo.class_finder.ClassFinder;
 import jline.console.completer.Completer;
 
 import java.util.List;
