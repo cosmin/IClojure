@@ -120,6 +120,8 @@ public class IClojureRepl {
             reader.getOutput().flush();
 
             return ret;
+        } catch (IOException ie){
+            throw ie;
         } catch (Throwable t) {
             lastError.set(t);
             printStackTrace(t);
@@ -129,12 +131,20 @@ public class IClojureRepl {
 
 
     private void print(Object output) throws IOException {
-        if (output != null) {
-            reader.print(getOutputPrompt());
-            RT.printString(output);
-            reader.println(RT.printString(output));
+        try{
+            if (output != null) {
+                reader.print(getOutputPrompt());
+                RT.printString(output);
+                reader.println(RT.printString(output));
+            }
+            reader.println();
+        } catch (IOException ie){
+            throw ie;
+        } catch (Throwable t){
+            lastError.set(t);
+            printStackTrace(t);
         }
-        reader.println();
+        
     }
 
     public void loop() {
