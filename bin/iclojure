@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
-if test -f project.clj && which -s lein; then
+function has_lein() {
+    # which -s would work on OS X but not Linux
+    which lein 2>&1 > /dev/null
+}
+
+if test -f project.clj && has_lein ; then
     # looks like a Leiningen project
     if test -f ~/.lein/plugins/lein-iclojure-*.jar; then
         # lein-iclojure is installed
