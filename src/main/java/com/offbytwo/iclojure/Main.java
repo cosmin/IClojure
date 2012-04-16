@@ -5,8 +5,8 @@ import clojure.lang.RT;
 import com.offbytwo.iclojure.repl.IClojureRepl;
 import com.offbytwo.iclojure.signals.ControlCSignalHandler;
 import com.offbytwo.iclojure.signals.RestoreTerminalHook;
-import jline.console.ConsoleReader;
-import jline.console.history.FileHistory;
+import com.iclojure.jline.console.ConsoleReader;
+import com.iclojure.jline.console.history.FileHistory;
 import org.apache.log4j.*;
 
 import java.io.File;

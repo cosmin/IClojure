@@ -1,7 +1,7 @@
 package com.offbytwo.iclojure.signals;
 
-import jline.console.ConsoleReader;
-import jline.console.history.FileHistory;
+import com.iclojure.jline.console.ConsoleReader;
+import com.iclojure.jline.console.history.FileHistory;
 
 public class RestoreTerminalHook extends Thread {
     public RestoreTerminalHook(final ConsoleReader reader) {

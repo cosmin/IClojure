@@ -1,6 +1,6 @@
 package com.offbytwo.iclojure.handlers;
 
-import jline.console.ConsoleReader;
+import com.iclojure.jline.console.ConsoleReader;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;

@@ -1,7 +1,7 @@
 package com.offbytwo.iclojure.completion;
 
 import com.offbytwo.class_finder.ClassFinder;
-import jline.console.completer.Completer;
+import com.iclojure.jline.console.completer.Completer;
 
 import java.util.List;
 import java.util.NavigableMap;

@@ -8,7 +8,7 @@ import com.offbytwo.iclojure.completion.DelegatingCompleter;
 import com.offbytwo.iclojure.exceptions.StopInputException;
 import com.offbytwo.iclojure.handlers.DescribeJavaObjectHandler;
 import com.offbytwo.iclojure.util.ConsoleOutputStreamWriter;
-import jline.console.ConsoleReader;
+import com.iclojure.jline.console.ConsoleReader;
 import org.fusesource.jansi.AnsiString;
 
 import java.io.IOException;

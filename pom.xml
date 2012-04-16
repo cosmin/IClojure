@@ -127,7 +127,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>jline</groupId>
+            <groupId>com.offbytwo</groupId>
             <artifactId>jline</artifactId>
             <version>2.6</version>
         </dependency>
@@ -135,7 +135,7 @@
         <dependency>
             <groupId>org.clojure</groupId>
             <artifactId>clojure</artifactId>
-            <version>1.4.0-alpha5</version>
+            <version>1.4.0</version>
         </dependency>
 
         <dependency>
