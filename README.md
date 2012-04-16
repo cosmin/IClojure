@@ -28,7 +28,7 @@ Then you can simply launch `iclojure` at any time.
 If you are already using Leiningen the simplest way to get started with IClojure is to use the `lein-iclojure` plugin.
 
 ```
-lein plugin install lein-iclojure "1.0.0-SNAPSHOT"
+lein plugin install lein-iclojure "1.0"
 lein irepl
 ```
 
