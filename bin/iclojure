@@ -14,7 +14,7 @@ if test -f project.clj && has_lein ; then
         echo "It looks like you are trying to use IClojure with a leiningen project."
         read -p "Do you want to install the latest lein-iclojure plugin? ([y]/n): " install
         if [[ $install == "y" || $install == "Y" || $install == "" ]]; then
-            lein plugin install lein-iclojure "1.0.0-SNAPSHOT"
+            lein plugin install lein-iclojure "1.0"
             lein trampoline irepl
         fi
     fi
