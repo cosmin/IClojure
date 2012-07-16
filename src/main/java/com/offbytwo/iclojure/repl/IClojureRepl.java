@@ -389,20 +389,25 @@ public class IClojureRepl {
     }
 
     public void help() throws IOException {
-        reader.println("doc         => show documentation of the given function or macro");
-        reader.println("source      => show source of the given function or macro");
+        reader.println("(doc fn)         -> show documentation of the given function or macro");
+        reader.println("?fn              -> show documentation of the given function or macro");
+        reader.println("(source fn)      -> show source of the given function or macro");
+        reader.println("??fn             -> show source of the given function or macro");
         reader.println();
-        reader.println("dir         => show all the names in the given namespace");
-        reader.println("apropos     => all definitions in all loaded namespaces that match the given pattern");
-        reader.println("find-doc    => print doc for any var whose doc or name matches the given pattern");
+        reader.println("(dir ns)         -> show all the names in the given namespace");
+        reader.println("(apropos re)     -> all definitions in all loaded namespaces that match the given pattern");
+        reader.println("(find-doc re     -> print doc for any var whose doc or name matches the given pattern");
         reader.println();
-        reader.println("pst         => print stack trace of the given exception");
-        reader.println("pp          => pretty print the last value");
-        reader.println("pprint      => pretty print the given value");
+        reader.println("%d symbol        -> Describe Java class (show constructors, methods and fields)");
+        reader.println("%f class         -> find all classes matching this name (supports globs)");
+        reader.println("%f class package -> like the above, but restrict search to the given package");
         reader.println();
-        reader.println("(input i)   => return the input from line i");
-        reader.println("(output i)  => return the output from line i");
+        reader.println("(pst e)          -> print stack trace of the given exception");
+        reader.println("(pp)             -> pretty print the last value");
+        reader.println("(pprint v)       -> pretty print the given value");
+        reader.println();
+        reader.println("(input i)        -> return the input from line i");
+        reader.println("(output i)       -> return the output from line i");
     }
-
 
 }
