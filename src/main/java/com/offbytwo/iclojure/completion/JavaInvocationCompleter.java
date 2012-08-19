@@ -31,13 +31,17 @@ public class JavaInvocationCompleter implements Completer {
             }
 
             String form = buffer.replaceFirst("\\(\\. ", "").trim();
-            Object output = eval.invoke(RT.readString(form));
-            for (Method m : output.getClass().getMethods()) {
-                if (m.getName().startsWith(prefix)) {
-                    candidates.add(m.getName());
-                }
-            }
-            return matchStart;
+	    try {
+		Object output = eval.invoke(RT.readString(form));
+		for (Method m : output.getClass().getMethods()) {
+		    if (m.getName().startsWith(prefix)) {
+			candidates.add(m.getName());
+		    }
+		}
+		return matchStart;
+	    } catch (RuntimeException re) {
+		return 0;
+	    }
         }
 
         return matchStart;
