@@ -81,7 +81,10 @@
 (defn resolve-class [sym]
   (try (let [val (resolve sym)]
          (when (class? val) val))
-       (catch ClassNotFoundException e)))
+       (catch ClassNotFoundException e)
+       (catch RuntimeException e
+         (if-not (instance? ClassNotFoundException (.getCause e))
+           (throw e)))))
 
 (defmulti potential-completions
   (fn [prefix ns]
