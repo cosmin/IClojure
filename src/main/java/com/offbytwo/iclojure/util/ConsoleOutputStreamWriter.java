@@ -1,6 +1,7 @@
 package com.offbytwo.iclojure.util;
 
-import com.iclojure.jline.console.ConsoleReader;
+
+import jline.console.ConsoleReader;
 
 import java.io.IOException;
 import java.io.OutputStream;

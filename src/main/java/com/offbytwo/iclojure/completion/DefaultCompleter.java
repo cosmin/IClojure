@@ -1,6 +1,6 @@
 package com.offbytwo.iclojure.completion;
 
-import com.iclojure.jline.console.completer.Completer;
+import jline.console.completer.Completer;
 
 import java.util.List;
 

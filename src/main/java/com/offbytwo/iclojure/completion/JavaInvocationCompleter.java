@@ -2,7 +2,7 @@ package com.offbytwo.iclojure.completion;
 
 import clojure.lang.RT;
 import clojure.lang.Var;
-import com.iclojure.jline.console.completer.Completer;
+import jline.console.completer.Completer;
 
 import java.lang.reflect.Method;
 import java.util.List;
