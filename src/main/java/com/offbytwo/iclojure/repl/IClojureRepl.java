@@ -131,8 +131,12 @@ public class IClojureRepl {
     private void print(Object output) throws IOException {
         if (output != null) {
             reader.print(getOutputPrompt());
-            RT.printString(output);
-            reader.println(RT.printString(output));
+            try {
+                reader.println(RT.printString(output));
+            } catch (Throwable t) {
+                lastError.set(t);
+                printStackTrace(t);
+            }
         }
         reader.println();
     }
