@@ -40,7 +40,7 @@ If you are already using the latest `clojure-maven-plugin` snapshot you can simp
 <dependency>
   <groupId>org.offbytwo.iclojure</groupId>
   <artifactId>iclojure</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
 </dependency>
 ```
 
