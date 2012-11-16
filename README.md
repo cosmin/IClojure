@@ -27,9 +27,18 @@ Then you can simply launch `iclojure` at any time.
 
 If you are already using Leiningen the simplest way to get started with IClojure is to use the `lein-iclojure` plugin.
 
+### Leiningen 1.x
+
 ```
-lein plugin install lein-iclojure "1.0"
-lein irepl
+lein plugin install lein-iclojure 1.1
+```
+
+### Leiningen 2
+
+Add `[lein-iclojure "1.1"]` to the `:user` profile in `~/.lein/profiles.clj`. Here is an example
+
+```clojure
+{:user {:plugins [ [lein-iclojure "1.1"] ]}}
 ```
 
 ### Maven
