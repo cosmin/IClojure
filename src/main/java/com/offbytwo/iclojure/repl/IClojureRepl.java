@@ -194,6 +194,9 @@ public class IClojureRepl {
         RT.load("clj_stacktrace/repl");
         userNs.refer(Symbol.create(null, "pst"), var("clj-stacktrace.repl", "pst"));
 
+        RT.load("cd_client/core");
+        userNs.refer(Symbol.create(null, "cdoc"), var("cd-client.core", "cdoc"));
+
         this.ns.set(userNs);
     }
 
@@ -235,13 +238,15 @@ public class IClojureRepl {
         if (line.equals("?")) {
             help();
             return null;
+        } else if (line.startsWith("???")) {
+            expanded = "(cd-client.core/cdoc " + line.substring(3) + ")";
         } else if (line.startsWith("??")) {
-            expanded = "(clojure.repl/source " + line.replace("??", "") + ")";
+            expanded = "(clojure.repl/source " + line.substring(2) + ")";
         } else {
             if (clojure1_2) {
-                expanded = "(clojure.core/doc " + line.replace("?", "") + ")";
+                expanded = "(clojure.core/doc " + line.substring(1) + ")";
             } else {
-                expanded = "(clojure.repl/doc " + line.replace("?", "") + ")";
+                expanded = "(clojure.repl/doc " + line.substring(1) + ")";
             }
         }
 

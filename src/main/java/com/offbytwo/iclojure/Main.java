@@ -132,6 +132,7 @@ public class Main {
         reader.println("?                -> Introduction and overview of IClojure's features");
         reader.println("?symbol          -> Print documentation for symbol");
         reader.println("??symbol         -> Show source of function or macro");
+        reader.println("???symbol        -> Show documentation from clojuredocs.org");
         reader.println("%d symbol        -> Describe Java class (show constructors, methods and fields)");
         reader.println("%f class         -> find all classes matching this name (supports globs)");
         reader.println("%f class package -> like the above, but restrict search to the given package");
