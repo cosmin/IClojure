@@ -2,6 +2,8 @@
 
 An Interactive Clojure repl, inspired by IPython.
 
+[![Build Status](https://travis-ci.org/cosmin/IClojure.png?branch=master)](https://travis-ci.org/cosmin/IClojure)
+
 ## Getting started
 
 ### Standalone
