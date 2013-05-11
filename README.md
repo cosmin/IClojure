@@ -32,15 +32,15 @@ If you are already using Leiningen the simplest way to get started with IClojure
 ### Leiningen 1.x
 
 ```
-lein plugin install lein-iclojure 1.1
+lein plugin install lein-iclojure 1.2
 ```
 
 ### Leiningen 2
 
-Add `[lein-iclojure "1.1"]` to the `:user` profile in `~/.lein/profiles.clj`. Here is an example
+Add `[lein-iclojure "1.2"]` to the `:user` profile in `~/.lein/profiles.clj`. Here is an example
 
 ```clojure
-{:user {:plugins [ [lein-iclojure "1.1"] ]}}
+{:user {:plugins [ [lein-iclojure "1.2"] ]}}
 ```
 
 ### Maven
@@ -51,7 +51,7 @@ If you are already using the latest `clojure-maven-plugin` snapshot you can simp
 <dependency>
   <groupId>org.offbytwo.iclojure</groupId>
   <artifactId>iclojure</artifactId>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
@@ -127,6 +127,6 @@ In addition to the Clojure convention of caching the last 3 output in `*1`, `*2`
 
 ## License
 
-Copyright (C) 2012 Cosmin Stejerean
+Copyright (C) 2013 Cosmin Stejerean
 
 Distributed under the Eclipse Public License, the same as Clojure.
