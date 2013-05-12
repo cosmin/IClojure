@@ -76,7 +76,7 @@ public class Main {
         String homeFolder = System.getProperty("user.home");
         File logFile = new File(homeFolder, ".iclojure.log");
 
-        Logger logger = Logger.getLogger("com.offbytwo.iclojure");
+        Logger logger = Logger.getLogger("com.offbytwo");
         logger.setLevel(LOG_LEVEL);
 
         try {
