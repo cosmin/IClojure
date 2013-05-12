@@ -81,7 +81,7 @@ public class IClojureRepl {
     }
 
     private Object readPotentiallyMultilineForm(String line) {
-        inputSoFar.append(line).append(" ");
+        inputSoFar.append(line).append("\n");
 
         try {
             for (; ; ) {
@@ -96,7 +96,7 @@ public class IClojureRepl {
                     if (t.getMessage().contains("EOF while reading")) {
                         try {
                             String newLine = readLine(false);
-                            inputSoFar.append(newLine).append(" ");
+                            inputSoFar.append(newLine).append("\n");
                         } catch (IOException e) {
                             e.printStackTrace();
                             return null;
