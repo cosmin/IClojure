@@ -12,7 +12,6 @@ import static java.util.Arrays.asList;
 
 public class ClojureCompletionWrapper {
     private Var completions;
-    private Var eval;
 
     public ClojureCompletionWrapper() {
         try {
@@ -22,7 +21,6 @@ public class ClojureCompletionWrapper {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Error: Unable to load complete.clj", e);
         }
-        this.eval = RT.var("clojure.core", "eval");
         this.completions = RT.var("complete", "completions");
     }
 

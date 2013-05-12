@@ -12,18 +12,16 @@ import java.util.regex.Pattern;
 
 public class DelegatingCompleter implements Completer {
     public Map<Pattern, Completer> completers = new LinkedHashMap<Pattern, Completer>();
-    private ClassFinder classFinder;
 
     public static Pattern pattern(String matchThis) {
         return Pattern.compile(matchThis + "(.*)");
     }
 
     public DelegatingCompleter(ClassFinder classFinder) throws IOException, ClassNotFoundException {
-        this.classFinder = classFinder;
         ClojureCompletionWrapper wrapper = new ClojureCompletionWrapper();
 
         DefaultCompleter DEFAULT_COMPLETER = new DefaultCompleter(wrapper);
-        JavaInvocationCompleter JAVA_COMPLETER = new JavaInvocationCompleter(wrapper);
+        JavaInvocationCompleter JAVA_COMPLETER = new JavaInvocationCompleter();
         Completer FQN_CLASS_FINDER = new FqnClassCompleter(classFinder);
 
         // java interop

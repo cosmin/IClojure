@@ -8,11 +8,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 public class JavaInvocationCompleter implements Completer {
-    private ClojureCompletionWrapper completions;
     private Var eval;
 
-    public JavaInvocationCompleter(ClojureCompletionWrapper wrapper) {
-        completions = wrapper;
+    public JavaInvocationCompleter() {
         this.eval = RT.var("clojure.core", "eval");
     }
 
