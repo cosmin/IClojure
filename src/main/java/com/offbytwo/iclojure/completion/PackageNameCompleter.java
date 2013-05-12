@@ -15,12 +15,12 @@ public class PackageNameCompleter implements Completer {
     }
 
     public int complete(String buffer, int cursor, List<CharSequence> candidates) {
-        if(buffer.contains(" ")) {
+        if (buffer.contains(" ")) {
             int matchStart = buffer.lastIndexOf(" ") + 1;
             String classNamePrefix = buffer.substring(matchStart);
             String packageName = buffer.substring(0, buffer.indexOf(" "));
 
-            NavigableMap<String,NavigableSet<String>> classesByPackageName = classFinder.getClassesByPackageName();
+            NavigableMap<String, NavigableSet<String>> classesByPackageName = classFinder.getClassesByPackageName();
             if (classesByPackageName.containsKey(packageName)) {
                 candidates.addAll(classesByPackageName.get(packageName).subSet(classNamePrefix, classNamePrefix + "\uffff"));
             }

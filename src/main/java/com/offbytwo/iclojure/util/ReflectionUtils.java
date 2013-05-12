@@ -8,7 +8,7 @@ import java.util.List;
 
 import static com.offbytwo.iclojure.util.StringUtils.join;
 
-class Pair<A,B> {
+class Pair<A, B> {
     public A first;
     public B second;
 
