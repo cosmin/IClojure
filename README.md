@@ -49,7 +49,7 @@ If you are already using the latest `clojure-maven-plugin` snapshot you can simp
 
 ```
 <dependency>
-  <groupId>org.offbytwo.iclojure</groupId>
+  <groupId>com.offbytwo.iclojure</groupId>
   <artifactId>iclojure</artifactId>
   <version>1.2.0</version>
 </dependency>
